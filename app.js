@@ -1,65 +1,45 @@
-// CONFIGURAZIONE PREZZI (Punto 8 e 9 delle tue richieste)
-const PREZZI = {
-    PS: {
-        settimana: { 30: 6, 60: 10, 120: 18 },
-        weekend: { 30: 7, 60: 12, 120: 20 }
-    },
-    SIM_VR: {
-        settimana: { 30: 7, 60: 12, 120: 20 },
-        weekend: { 30: 8, 60: 14, 120: 20 }
-    }
-};
+const supabaseUrl = 'TUA_URL';
+const supabaseKey = 'TUA_KEY';
+const sb = supabase.createClient(supabaseUrl, supabaseKey);
 
-// 1. SALVATAGGIO AUTOMATICO CREDENZIALI (Punto 1)
-async function checkSession() {
-    const { data: { session }, error } = await sb.auth.getSession();
-    if (session) {
-        user = session.user;
-        await loadUserData();
-        showSection('dashboard');
-    }
-}
+let currentUser = null;
+let selectedGame = null;
 
-// 2. CALCOLO PREZZI DINAMICO (Punto 2, 8, 9)
-function calcolaPrezzoPrenotazione(tipoPostazione, durataMinuti) {
-    const d = new Date();
-    const isWeekend = (d.getDay() === 0 || d.getDay() === 6); // 0=Domenica, 6=Sabato
-    const fascia = isWeekend ? 'weekend' : 'settimana';
-    
-    let categoria = 'PS';
-    if (tipoPostazione.includes('Simulatore') || tipoPostazione.includes('VR')) {
-        categoria = 'SIM_VR';
-    }
-
-    return PREZZI[categoria][fascia][durataMinuti] || 0;
-}
-
-// 3. LOGICA SEZIONE ADMIN SEPARATA (Punto 5)
-function accessAdminSection() {
-    // Controlla se l'utente ha il ruolo admin nei metadati di Supabase
-    if (user && user.app_metadata.role === 'admin') {
-        showSection('admin-panel');
+// 1. LOGIN AUTOMATICO
+async function initApp() {
+    const { data } = await sb.auth.getSession();
+    if (data.session) {
+        currentUser = data.session.user;
+        checkAdmin();
+        loadLeaderboard();
     } else {
-        showToast("Accesso negato: Area riservata agli Admin", "error");
+        // Logica di redirect al login
     }
 }
 
-// 4. CLASSIFICA ORE DI GIOCO (Punto 4 e 7)
-async function loadHoursLeaderboard(startDate, endDate) {
-    // Questa funzione somma le ore dalle prenotazioni invece delle vittorie
-    let query = sb.from('bookings')
-        .select('profile_id, duration_minutes, profiles(username)')
-        .eq('status', 'completed');
+// 2. CALCOLO PREZZI DINAMICO (Weekend e Durata)
+function getPrice(category, duration) {
+    const day = new Date().getDay();
+    const isWE = (day === 0 || day === 6); // 0=Domenica, 6=Sabato
 
-    if (startDate && endDate) {
-        query = query.gte('created_at', startDate).lte('created_at', endDate);
-    }
+    const rates = {
+        ps: isWE ? {30:7, 60:12, 120:20} : {30:6, 60:10, 120:18},
+        sim: isWE ? {30:8, 60:14, 120:20} : {30:7, 60:12, 120:20}
+    };
 
-    const { data, error } = await query;
-    // Logica di raggruppamento per utente...
+    return rates[category][duration];
 }
 
-// Inizializzazione al caricamento
-document.addEventListener('DOMContentLoaded', () => {
-    checkSession();
-});
+// 3. GESTIONE SEZIONI
+function showSection(id) {
+    document.querySelectorAll('.page-section').forEach(s => s.style.display = 'none');
+    document.getElementById('sec-' + id).style.display = 'block';
+}
+
+function checkAdmin() {
+    if(currentUser.email === 'admin@glasti.it') { // Cambia con la tua mail
+        document.getElementById('admin-link').style.display = 'block';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', initApp);
