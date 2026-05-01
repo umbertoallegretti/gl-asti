@@ -3,236 +3,263 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gaming Lounge Asti | Hub</title>
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind & FontAwesome -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Supabase SDK -->
+    <title>GL Asti - Gaming Lounge</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Exo+2:ital,wght@0,400;0,700;1,600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --neon-cyan: #00f3ff;
-            --neon-magenta: #ff00ff;
+            --primary: #00f2ff;
+            --secondary: #7000ff;
             --bg-dark: #0a0a0c;
-            --card-bg: rgba(20, 20, 25, 0.8);
+            --bg-card: #15151a;
+            --text-main: #e0e0e0;
+            --accent-green: #39ff14;
         }
 
-        body {
-            font-family: 'Exo 2', sans-serif;
-            background-color: var(--bg-dark);
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Exo 2', sans-serif; 
+            background-color: var(--bg-dark); 
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, .nav-logo { font-family: 'Rajdhani', sans-serif; text-transform: uppercase; }
+
+        /* --- UI COMPONENTS --- */
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        .card {
+            background: var(--bg-card);
+            border: 1px solid #2d2d35;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, var(--secondary), var(--primary));
             color: white;
-            background-image: 
-                radial-gradient(circle at 20% 30%, rgba(0, 243, 255, 0.05) 0%, transparent 40%),
-                radial-gradient(circle at 80% 70%, rgba(255, 0, 255, 0.05) 0%, transparent 40%);
-        }
-
-        .font-rajdhani { font-family: 'Rajdhani', sans-serif; }
-
-        /* Effetti Cyberpunk */
-        .glass-panel {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(0, 243, 255, 0.2);
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-            transition: all 0.3s ease;
-        }
-
-        .neon-border-hover:hover {
-            border-color: var(--neon-cyan);
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
-        }
-
-        .btn-primary {
-            background: linear-gradient(45deg, var(--neon-cyan), #00a8ff);
-            color: black;
-            font-weight: 900;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: transform 0.2s, box-shadow 0.2s;
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 20px var(--neon-cyan);
+        .btn:hover { transform: scale(1.02); filter: brightness(1.1); }
+
+        /* --- NAVIGATION --- */
+        nav {
+            background: rgba(10, 10, 12, 0.95);
+            padding: 15px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        /* Animazione Caricamento */
-        .loader {
-            border: 3px solid rgba(0, 243, 255, 0.1);
-            border-radius: 50%;
-            border-top: 3px solid var(--neon-cyan);
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
+        .nav-logo { color: var(--primary); font-size: 1.5rem; font-weight: 800; letter-spacing: 2px; }
+
+        /* --- SECTIONS --- */
+        .section { display: none; animation: fadeIn 0.4s ease-out; }
+        .section.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* --- BOOKING GRID --- */
+        .grid-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg-dark); }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--neon-cyan); }
+        .option-item {
+            border: 1px solid #333;
+            padding: 15px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .option-item.selected {
+            border-color: var(--primary);
+            background: rgba(0, 242, 255, 0.1);
+        }
+
+        /* --- PROFILE & LEVEL --- */
+        .level-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: var(--secondary);
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+        }
+
+        .client-code {
+            font-size: 2rem;
+            color: var(--primary);
+            letter-spacing: 5px;
+            text-align: center;
+            margin: 10px 0;
+        }
     </style>
 </head>
-<body class="min-h-screen pb-12">
+<body>
 
-    <!-- Header / Navigation -->
-    <nav class="sticky top-0 z-50 glass-panel border-b border-cyan-500/30 px-6 py-4 mb-8">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-cyan-500 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(0,243,255,0.5)]">
-                    <i class="fas fa-gamepad text-black text-xl"></i>
-                </div>
-                <h1 class="text-2xl font-black font-rajdhani tracking-tighter uppercase italic">
-                    Gaming Lounge <span class="text-cyan-400">Asti</span>
-                </h1>
-            </div>
-            
-            <div id="nav-user" class="hidden flex items-center gap-6">
-                <span id="user-points" class="text-sm font-bold text-cyan-400 bg-cyan-400/10 px-3 py-1 rounded-full border border-cyan-400/20">
-                    <i class="fas fa-clock mr-2"></i><span id="hours-display">0</span>h
-                </span>
-                <button onclick="logout()" class="text-gray-400 hover:text-red-400 transition-colors">
-                    <i class="fas fa-power-off text-xl"></i>
-                </button>
+<nav>
+    <div class="nav-logo">GL ASTI</div>
+    <div id="user-nav-info"></div>
+</nav>
+
+<div class="container">
+    <!-- Login / Registrazione -->
+    <section id="auth-section" class="section active">
+        <div class="card">
+            <h2>Accesso Player</h2>
+            <input type="email" id="email" placeholder="Email" style="width:100%; padding:10px; margin:10px 0; border-radius:4px; border:1px solid #333; background:#111; color:white;">
+            <input type="password" id="password" placeholder="Password" style="width:100%; padding:10px; margin:10px 0; border-radius:4px; border:1px solid #333; background:#111; color:white;">
+            <button class="btn" onclick="handleAuth()">Accedi / Registrati</button>
+        </div>
+    </section>
+
+    <!-- Main Dashboard -->
+    <section id="dashboard-section" class="section">
+        <div class="card">
+            <div id="profile-summary">
+                <span class="level-badge" id="player-level">Novice</span>
+                <h2 id="player-name">Caricamento...</h2>
+                <p>Codice Cliente:</p>
+                <div class="client-code" id="display-client-code">----</div>
             </div>
         </div>
-    </nav>
 
-    <main class="max-w-7xl mx-auto px-4">
+        <div class="grid-options">
+            <div class="option-item" onclick="showSection('booking-section')">🎮 Prenota</div>
+            <div class="option-item" onclick="showSection('tournaments-section')">🏆 Tornei</div>
+            <div class="option-item" onclick="showSection('rewards-section')">🎁 Buoni</div>
+        </div>
+    </section>
+
+    <!-- Prenotazione -->
+    <section id="booking-section" class="section">
+        <button class="btn" onclick="showSection('dashboard-section')" style="margin-bottom:15px; background: #333;">← Torna Indietro</button>
+        <div class="card">
+            <h3>Nuova Prenotazione</h3>
+            <p>Seleziona Postazione:</p>
+            <div class="grid-options" id="station-options">
+                <div class="option-item" onclick="selectStation('PS5')">PS5</div>
+                <div class="option-item" onclick="selectStation('SIM')">Simulatore</div>
+                <div class="option-item" onclick="selectStation('VR')">VR</div>
+            </div>
+            <p>Durata:</p>
+            <div class="grid-options" id="duration-options">
+                <div class="option-item" onclick="selectDuration(60)">60 Min</div>
+                <div class="option-item" onclick="selectDuration(120)">120 Min</div>
+            </div>
+            <button class="btn" onclick="confirmBooking()">Conferma Prenotazione</button>
+        </div>
+    </section>
+
+    <!-- Buoni/Premi -->
+    <section id="rewards-section" class="section">
+        <button class="btn" onclick="showSection('dashboard-section')" style="margin-bottom:15px; background: #333;">← Torna Indietro</button>
+        <h2>I Tuoi Buoni</h2>
+        <div id="coupons-list">
+            <!-- I buoni verranno iniettati qui -->
+            <p style="text-align:center; opacity:0.5;">Nessun buono disponibile al momento.</p>
+        </div>
+    </section>
+</div>
+
+<script>
+    // CONFIGURAZIONE SUPABASE
+    // Sostituisci con le tue chiavi reali
+    const SUPABASE_URL = 'https://tuo-id.supabase.co';
+    const SUPABASE_KEY = 'tua-chiave-anon-public';
+    const supabase = document.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let currentUser = null;
+
+    // Gestione Navigazione
+    function showSection(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    // Autenticazione (Logica semplificata)
+    async function handleAuth() {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+        if (error) {
+            // Se non esiste, prova a registrarlo (Nota: logica semplificata per demo)
+            const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email, password });
+            if (signUpError) alert(signUpError.message);
+            else alert("Controlla l'email per confermare la registrazione!");
+        } else {
+            currentUser = data.user;
+            loadPlayerData();
+            showSection('dashboard-section');
+        }
+    }
+
+    async function loadPlayerData() {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', currentUser.id)
+            .single();
+
+        if (profile) {
+            document.getElementById('player-name').innerText = profile.username || 'Player';
+            document.getElementById('display-client-code').innerText = profile.client_code;
+            document.getElementById('player-level').innerText = calculateLevel(profile.total_hours);
+        }
+    }
+
+    function calculateLevel(hours) {
+        if (hours > 100) return 'Leggenda';
+        if (hours > 50) return 'Pro';
+        if (hours > 10) return 'Veteran';
+        return 'Novice';
+    }
+
+    // Esempio logica prenotazione
+    let bookingData = { station: '', duration: 0 };
+
+    function selectStation(type) {
+        bookingData.station = type;
+        // Logic to highlight selection
+    }
+
+    function selectDuration(mins) {
+        bookingData.duration = mins;
+    }
+
+    async function confirmBooking() {
+        if (!bookingData.station || !bookingData.duration) return alert("Seleziona tutti i campi");
         
-        <!-- Login Section (Visible by default) -->
-        <section id="auth-section" class="max-w-md mx-auto mt-20">
-            <div class="glass-panel p-8 rounded-2xl border-t-4 border-t-cyan-500">
-                <h2 class="text-3xl font-black font-rajdhani mb-6 text-center">ACCESSO PLAYER</h2>
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs uppercase text-gray-400 mb-1 ml-1">Email</label>
-                        <input type="email" id="email" class="w-full bg-black/50 border border-gray-700 rounded-lg px-4 py-3 focus:border-cyan-500 outline-none transition-all">
-                    </div>
-                    <div>
-                        <label class="block text-xs uppercase text-gray-400 mb-1 ml-1">Password</label>
-                        <input type="password" id="password" class="w-full bg-black/50 border border-gray-700 rounded-lg px-4 py-3 focus:border-cyan-500 outline-none transition-all">
-                    </div>
-                    <button onclick="login()" id="login-btn" class="w-full btn-primary py-4 rounded-lg mt-4 flex justify-center items-center">
-                        Entra nel Sistema
-                    </button>
-                </div>
-            </div>
-        </section>
+        // Inserimento a DB (Esempio)
+        alert(`Prenotazione effettuata per ${bookingData.station}!`);
+        showSection('dashboard-section');
+    }
+</script>
 
-        <!-- Player Dashboard (Hidden) -->
-        <section id="dashboard" class="hidden space-y-8">
-            <!-- Stats Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="glass-panel p-6 rounded-xl flex items-center gap-4">
-                    <div class="p-4 bg-cyan-500/10 rounded-lg text-cyan-400"><i class="fas fa-user-tag text-2xl"></i></div>
-                    <div>
-                        <p class="text-gray-400 text-sm uppercase">Codice Cliente</p>
-                        <p id="client-code" class="text-2xl font-bold font-rajdhani tracking-widest text-white">----</p>
-                    </div>
-                </div>
-                <!-- Altre card statistiche... -->
-            </div>
-
-            <!-- Main Actions -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Booking Form -->
-                <div class="lg:col-span-2 glass-panel p-8 rounded-2xl">
-                    <h3 class="text-2xl font-bold font-rajdhani mb-6 flex items-center gap-3">
-                        <i class="fas fa-calendar-plus text-cyan-400"></i> PRENOTA POSTAZIONE
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Input per la prenotazione (Data, Ora, Postazione) -->
-                        <!-- ... -->
-                    </div>
-                </div>
-
-                <!-- Leaderboard / Tornei -->
-                <div class="glass-panel p-6 rounded-2xl">
-                    <h3 class="text-xl font-bold font-rajdhani mb-4">TOP PLAYERS</h3>
-                    <div id="leaderboard-list" class="space-y-4">
-                        <!-- Caricamento dinamico dei top player -->
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Admin Panel (Hidden) -->
-        <section id="admin-panel" class="hidden mt-12 glass-panel p-8 rounded-2xl border-t-4 border-t-magenta-500">
-            <!-- Gestione Prenotazioni e Ore... -->
-        </section>
-
-    </main>
-
-    <script>
-        // Configurazione Supabase (Sostituisci con i tuoi dati reali)
-        const SUPABASE_URL = 'https://tua-url.supabase.co';
-        const SUPABASE_KEY = 'tua-chiave-anon-public';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        // Funzione Login Migliorata
-        async function login() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const btn = document.getElementById('login-btn');
-
-            btn.innerHTML = '<div class="loader"></div>';
-            btn.disabled = true;
-
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-            if (error) {
-                alert("Errore: " + error.message);
-                btn.innerHTML = 'Entra nel Sistema';
-                btn.disabled = false;
-            } else {
-                checkUserSession();
-            }
-        }
-
-        // Gestione Sessione e UI
-        async function checkUserSession() {
-            const { data: { user } } = await supabase.auth.getUser();
-            
-            if (user) {
-                document.getElementById('auth-section').classList.add('hidden');
-                document.getElementById('dashboard').classList.remove('hidden');
-                document.getElementById('nav-user').classList.remove('flex', 'hidden');
-                document.getElementById('nav-user').classList.add('flex');
-                
-                // Carica dati profilo (ore, codice cliente)
-                loadUserData(user.id);
-            }
-        }
-
-        async function loadUserData(userId) {
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', userId)
-                .single();
-
-            if (data) {
-                document.getElementById('hours-display').innerText = data.ore_gioco;
-                document.getElementById('client-code').innerText = data.client_code || 'N/D';
-            }
-        }
-
-        async function logout() {
-            await supabase.auth.signOut();
-            window.location.reload();
-        }
-
-        // Esegui al caricamento
-        window.onload = checkUserSession;
-    </script>
 </body>
 </html>
