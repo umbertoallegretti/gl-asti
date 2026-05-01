@@ -5,72 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GL Asti - Gaming Lounge</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Supabase Library -->
+    <!-- Carica Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-    <!-- Navbar principale -->
     <nav class="navbar">
         <div class="nav-item" onclick="showSection('home')">Home</div>
         <div class="nav-item" onclick="showSection('booking')">Prenota</div>
         <div class="nav-item" onclick="showSection('leaderboard')">Classifica</div>
-        <div class="nav-item" id="admin-link" style="display:none;" onclick="showSection('admin')">Admin</div>
+        <div id="admin-link" class="nav-item" style="display:none;" onclick="showSection('admin')">Admin</div>
         <div class="nav-item" onclick="showSection('profile')">Profilo</div>
     </nav>
 
     <main id="main-content">
+        <!-- Sezione Home/Login -->
+        <section id="sec-home" class="page-section">
+            <div id="login-welcome">
+                <h1>Benvenuto alla GL Asti</h1>
+                <p>Verifica della sessione in corso...</p>
+            </div>
+        </section>
+
         <!-- Sezione Prenotazione -->
-        <section id="sec-booking" class="page-section">
+        <section id="sec-booking" class="page-section" style="display:none;">
             <h2>Prenota la tua sessione</h2>
-            <div class="booking-container">
-                <button class="btn-select" onclick="openGamePopup()">Scegli Gioco</button>
+            <div class="card">
+                <button class="btn-popup" onclick="openGamePopup()">🎮 Scegli Gioco</button>
                 <p id="selected-game-display">Nessun gioco selezionato</p>
-                
-                <select id="duration-select">
-                    <option value="30">30 Minuti</option>
-                    <option value="60">1 Ora</option>
-                    <option value="120">2 Ore</option>
-                </select>
-                
                 <div id="price-preview">Prezzo: -- €</div>
-                <button class="btn-confirm" onclick="handleBooking()">Conferma Prenotazione</button>
             </div>
         </section>
 
-        <!-- Sezione Classifica -->
-        <section id="sec-leaderboard" class="page-section" style="display:none;">
-            <h2>🏆 Classifica Mensile</h2>
-            <div id="prizes-display" class="prizes-box"></div>
-            <div id="leaderboard-list"></div>
-        </section>
-
-        <!-- Sezione Admin (Nuova) -->
-        <section id="sec-admin" class="page-section" style="display:none;">
-            <h2>Pannello Gestionale</h2>
-            <div class="admin-card">
-                <h3>Gestione Giochi</h3>
-                <textarea id="admin-game-list" placeholder="Inserisci i giochi (uno per riga)"></textarea>
-                <button onclick="updateGames()">Aggiorna Lista Giochi</button>
-            </div>
-            <div class="admin-card">
-                <h3>Premi Mensili</h3>
-                <input type="text" id="prize-1" placeholder="Premio 1° Posto">
-                <input type="text" id="prize-2" placeholder="Premio 2° Posto">
-                <input type="text" id="prize-3" placeholder="Premio 3° Posto">
-                <button onclick="updatePrizes()">Salva Premi</button>
-            </div>
-        </section>
+        <!-- Altre sezioni (vuote per ora) -->
+        <section id="sec-leaderboard" class="page-section" style="display:none;"><h2>Classifica</h2></section>
+        <section id="sec-admin" class="page-section" style="display:none;"><h2>Pannello Admin</h2></section>
+        <section id="sec-profile" class="page-section" style="display:none;"><h2>Il tuo Profilo</h2></section>
     </main>
-
-    <!-- Popup Selezione Gioco -->
-    <div id="game-popup" class="modal">
-        <div class="modal-content">
-            <h3>Scegli un gioco</h3>
-            <div id="popup-game-list"></div>
-            <button onclick="closeGamePopup()">Annulla</button>
-        </div>
-    </div>
 
     <script src="app.js"></script>
 </body>
