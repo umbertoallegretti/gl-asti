@@ -20,7 +20,7 @@ async function checkUserSession() {
         console.log("Accesso eseguito come:", currentUser.email);
         
         // Se è l'admin, mostra il tasto admin
-        if (currentUser.email === 'tuoemailadmin@esempio.it') { // Sostituisci con la tua mail admin
+        if (currentUser.email === 'sk1zz8@hotmail.it') { // Sostituisci con la tua mail admin
             document.getElementById('admin-link').style.display = 'block';
         }
 
