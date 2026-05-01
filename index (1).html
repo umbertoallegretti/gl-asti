@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#0a0a0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="GL Asti">
+<title>GL Asti — Gaming Lounge</title>
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#0a0a0f;--bg2:#111118;--bg3:#1a1a24;--card:#16161f;--border:#2a2a3a;--accent:#e94560;--accent2:#7c3aed;--gold:#f59e0b;--text:#f0f0f8;--text2:#8888aa;--green:#10b981;--red:#ef4444;--r:12px}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+#app{min-height:100vh;display:flex;flex-direction:column}
+.screen{display:none;flex-direction:column;min-height:100vh}.screen.active{display:flex}
+#auth-screen{background:radial-gradient(ellipse at 30% 20%,#1a0a2e,var(--bg) 60%),radial-gradient(ellipse at 80% 80%,#1a050a,transparent 50%);align-items:center;justify-content:center;padding:24px}
+.auth-logo{text-align:center;margin-bottom:40px}
+.logo-mark{width:80px;height:80px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:20px;display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700;color:white;margin:0 auto 16px;box-shadow:0 0 40px rgba(233,69,96,.4)}
+.auth-logo h1{font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700;letter-spacing:2px}
+.auth-logo p{color:var(--text2);font-size:13px;margin-top:4px}
+.auth-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:28px;width:100%;max-width:360px}
+.auth-tabs{display:flex;background:var(--bg2);border-radius:8px;padding:4px;margin-bottom:24px}
+.auth-tab{flex:1;padding:8px;text-align:center;border-radius:6px;cursor:pointer;font-size:14px;font-weight:500;color:var(--text2);transition:all .2s}
+.auth-tab.active{background:var(--accent);color:white}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:11px;color:var(--text2);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px}
+.form-group input,.form-group select{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--text);font-size:14px;font-family:'Exo 2',sans-serif;outline:none;transition:border-color .2s}
+.form-group input:focus,.form-group select:focus{border-color:var(--accent)}
+.btn-primary{width:100%;background:linear-gradient(135deg,var(--accent),#c0334e);border:none;border-radius:8px;padding:13px;color:white;font-size:15px;font-weight:600;font-family:'Rajdhani',sans-serif;letter-spacing:1px;cursor:pointer;transition:opacity .2s}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-accent{background:linear-gradient(135deg,var(--accent2),#5b21b6);border:none;border-radius:8px;padding:11px 20px;color:white;font-size:13px;font-weight:600;font-family:'Rajdhani',sans-serif;letter-spacing:1px;cursor:pointer}
+.btn-sm{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;font-family:'Rajdhani',sans-serif;color:var(--text);cursor:pointer;letter-spacing:1px;transition:all .2s}
+.btn-sm:hover{border-color:var(--accent);color:var(--accent)}
+.btn-danger{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:6px;padding:6px 12px;color:var(--red);font-size:11px;font-weight:600;cursor:pointer;font-family:'Rajdhani',sans-serif}
+.btn-success{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:6px;padding:6px 12px;color:var(--green);font-size:11px;font-weight:600;cursor:pointer;font-family:'Rajdhani',sans-serif}
+.auth-msg{text-align:center;font-size:13px;margin-top:10px;min-height:18px}
+.auth-msg.error{color:var(--accent)}.auth-msg.success{color:var(--green)}
+#main-screen{background:var(--bg)}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar-logo{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;letter-spacing:2px}
+.topbar-logo span{color:var(--accent)}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:14px;cursor:pointer}
+.notif-btn{width:36px;height:36px;background:var(--bg3);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;font-size:16px}
+.notif-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;background:var(--accent);border-radius:50%;border:2px solid var(--bg2);display:none}
+.content{flex:1;overflow-y:auto;padding-bottom:80px}
+.tab-content{display:none}.tab-content.active{display:block}
+.section-title{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;letter-spacing:2px;color:var(--text2);text-transform:uppercase;padding:0 16px;margin-bottom:10px}
+.section-title span{color:var(--accent)}
+.hero-banner{background:linear-gradient(135deg,#1a0520,#0a0a1f 50%,#1a050a);padding:24px 16px;position:relative;overflow:hidden}
+.hero-banner::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(233,69,96,.15),transparent 70%)}
+.hero-greeting{font-size:13px;color:var(--text2);margin-bottom:4px;position:relative}
+.hero-name{font-family:'Rajdhani',sans-serif;font-size:26px;font-weight:700;position:relative}
+.hero-name span{color:var(--accent)}
+.points-bar{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin:16px;display:flex;align-items:center;justify-content:space-between}
+.points-left{display:flex;align-items:center;gap:10px}
+.points-label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px}
+.points-value{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:var(--gold)}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-bottom:20px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;text-align:center}
+.stat-icon{font-size:22px;margin-bottom:6px}
+.stat-val{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700}
+.stat-lbl{font-size:11px;color:var(--text2);margin-top:2px}
+.tournament-hero{margin:0 16px 20px;background:linear-gradient(135deg,#1a0a2e,#0f0f1a);border:1px solid rgba(124,58,237,.4);border-radius:var(--r);padding:20px;position:relative;overflow:hidden}
+.tourn-badge{display:inline-block;background:var(--accent2);color:white;font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+.tourn-title{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;margin-bottom:4px}
+.tourn-info{font-size:12px;color:var(--text2);margin-bottom:14px}
+.tourn-meta{display:flex;gap:16px;margin-bottom:14px;flex-wrap:wrap}
+.tourn-meta-item{font-size:12px}
+.tourn-meta-item span{color:var(--text2)}
+.tourn-meta-item strong{color:var(--text);display:block;font-size:14px}
+.lb-item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.lb-item.me{border-color:rgba(233,69,96,.4);background:rgba(233,69,96,.05)}
+.lb-rank{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;width:28px;text-align:center}
+.lb-rank.gold{color:var(--gold)}.lb-rank.silver{color:#9ca3af}.lb-rank.bronze{color:#cd7c3a}
+.lb-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.lb-info{flex:1}.lb-name{font-size:14px;font-weight:600}.lb-sub{font-size:11px;color:var(--text2)}
+.lb-pts{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;color:var(--gold)}
+.filter-bar{display:flex;gap:8px;padding:14px 16px;overflow-x:auto}
+.filter-bar::-webkit-scrollbar{display:none}
+.filter-chip{flex-shrink:0;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;white-space:nowrap}
+.filter-chip.active{background:var(--accent);border-color:var(--accent);color:white}
+.tournament-card{margin:0 16px 12px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;cursor:pointer;transition:border-color .2s}
+.tournament-card:hover{border-color:var(--accent)}
+.tc-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.tc-title{font-family:'Rajdhani',sans-serif;font-size:17px;font-weight:700}
+.tc-status{font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:1px}
+.tc-status.open{background:rgba(16,185,129,.2);color:var(--green)}
+.tc-status.full{background:rgba(239,68,68,.2);color:var(--red)}
+.tc-status.ongoing{background:rgba(245,158,11,.2);color:var(--gold)}
+.tc-status.closed{background:rgba(107,114,128,.2);color:#6b7280}
+.game-card{background:var(--card);border:2px solid var(--border);border-radius:var(--r);padding:16px;text-align:center;cursor:pointer;transition:all .2s}
+.game-card:hover{border-color:var(--accent);background:rgba(233,69,96,.08)}
+.game-card-icon{font-size:32px;margin-bottom:8px}
+.game-card-name{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;margin-bottom:4px}
+.game-card-avail{font-size:11px;color:var(--green)}
+.date-nav{display:flex;align-items:center;justify-content:space-between;padding:0 16px;margin-bottom:12px}
+.date-nav-btn{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 14px;cursor:pointer;font-size:16px}
+.date-nav-btn:hover{border-color:var(--accent)}
+.date-display{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;text-align:center}
+.date-display .day-name{font-size:11px;color:var(--text2);display:block;text-transform:uppercase;letter-spacing:1px}
+.slots-container{padding:0 16px}
+.time-slot{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:6px;cursor:pointer;transition:all .2s}
+.time-slot:hover:not(.taken){border-color:var(--accent)}
+.time-slot.taken{opacity:.4;cursor:not-allowed}
+.time-slot.selected{background:rgba(233,69,96,.1);border-color:var(--accent)}
+.slot-time-text{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700}
+.slot-status.free{color:var(--green)}.slot-status.busy{color:var(--accent)}
+.booking-confirm-bar{position:fixed;bottom:72px;left:0;right:0;background:var(--bg2);border-top:1px solid var(--border);padding:12px 16px;display:none;z-index:99}
+.booking-confirm-bar.show{display:block}
+.booking-summary{font-size:13px;color:var(--text2);margin-bottom:10px}
+.booking-item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px}
+.booking-item-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.booking-item-title{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700}
+.booking-item-status{font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;background:rgba(16,185,129,.2);color:var(--green);text-transform:uppercase}
+.booking-item-meta{font-size:12px;color:var(--text2)}
+.btn-cancel-sm{background:rgba(233,69,96,.1);border:1px solid rgba(233,69,96,.3);border-radius:6px;padding:5px 10px;color:var(--accent);font-size:11px;font-weight:600;cursor:pointer;margin-top:8px;font-family:'Rajdhani',sans-serif}
+.duration-option{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:all .2s}
+.duration-option:hover{border-color:var(--accent);background:rgba(233,69,96,.05)}
+.duration-label{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700}
+.duration-price{font-size:16px;color:var(--green);font-weight:700}
+.duration-note{font-size:11px;color:var(--gold);margin-top:2px}
+.voucher-card{margin:0 16px 12px;border-radius:var(--r);padding:20px}
+.voucher-card.active-v{background:linear-gradient(135deg,#1a1a0a,#141410);border:1px solid rgba(245,158,11,.4)}
+.voucher-card.used-v{background:var(--card);border:1px solid var(--border);opacity:.6}
+.voucher-amount{font-family:'Rajdhani',sans-serif;font-size:36px;font-weight:700;color:var(--gold);line-height:1}
+.voucher-label{font-size:12px;color:var(--text2);margin-top:4px;margin-bottom:12px}
+.voucher-code{font-family:'Rajdhani',sans-serif;font-size:16px;letter-spacing:4px;background:var(--bg2);border:1px dashed var(--border);border-radius:6px;padding:8px 12px;display:inline-block;margin-bottom:10px}
+.voucher-footer{display:flex;justify-content:space-between;align-items:center}
+.voucher-exp{font-size:11px;color:var(--text2)}
+.voucher-badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:1px}
+.voucher-badge.active-b{background:rgba(16,185,129,.2);color:var(--green)}
+.voucher-badge.used-b{background:rgba(107,114,128,.2);color:#6b7280}
+.profile-header{background:linear-gradient(135deg,#1a0a2e,#0a0a1f);padding:24px 16px;text-align:center}
+.profile-avatar-big{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700;margin:0 auto 12px;box-shadow:0 0 30px rgba(233,69,96,.3)}
+.profile-username{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700}
+.profile-email{font-size:13px;color:var(--text2);margin-top:4px}
+.profile-level{display:inline-block;background:rgba(233,69,96,.15);border:1px solid rgba(233,69,96,.3);color:var(--accent);font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;margin-top:10px;letter-spacing:1px;text-transform:uppercase}
+.client-code-display{background:var(--bg2);border:1px dashed var(--border);border-radius:8px;padding:10px 16px;margin:12px 16px 0;display:flex;align-items:center;justify-content:space-between}
+.client-code-label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px}
+.client-code-val{font-family:'Rajdhani',sans-serif;font-size:24px;font-weight:700;color:var(--gold);letter-spacing:6px}
+.profile-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin:16px 0 0}
+.ps-item{background:var(--card);padding:16px 8px;text-align:center}
+.ps-val{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700}
+.ps-lbl{font-size:10px;color:var(--text2);margin-top:2px}
+.menu-list{padding:0 16px;margin-top:16px}
+.menu-item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px;cursor:pointer;transition:border-color .2s}
+.menu-item:hover{border-color:var(--accent)}
+.menu-item-icon{font-size:20px;width:32px;text-align:center}
+.menu-item-text{flex:1;font-size:14px;font-weight:500}
+.menu-item-arrow{color:var(--text2);font-size:12px}
+.btn-logout{margin:16px;background:rgba(233,69,96,.1);border:1px solid rgba(233,69,96,.3);border-radius:8px;padding:13px;color:var(--accent);font-size:14px;font-weight:600;font-family:'Rajdhani',sans-serif;letter-spacing:1px;cursor:pointer;width:calc(100% - 32px)}
+.admin-badge{background:rgba(245,158,11,.2);border:1px solid rgba(245,158,11,.4);color:var(--gold);font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;letter-spacing:1px;text-transform:uppercase}
+.admin-tabs{display:flex;background:var(--bg2);border-radius:8px;padding:3px;margin:0 16px 16px;gap:3px;overflow-x:auto}
+.admin-tabs::-webkit-scrollbar{display:none}
+.admin-tab{flex-shrink:0;padding:7px 10px;text-align:center;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;color:var(--text2);transition:all .2s;font-family:'Rajdhani',sans-serif;white-space:nowrap}
+.admin-tab.active{background:var(--accent2);color:white}
+.admin-page{display:none}.admin-page.active{display:block}
+.admin-section{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin:0 16px 14px}
+.admin-section-title{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;color:var(--text2);text-transform:uppercase;margin-bottom:12px}
+.stat-row-admin{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-bottom:14px}
+.stat-mini{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
+.stat-mini-val{font-family:'Rajdhani',sans-serif;font-size:24px;font-weight:700}
+.stat-mini-lbl{font-size:10px;color:var(--text2);margin-top:3px;text-transform:uppercase;letter-spacing:.5px}
+.admin-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(42,42,58,.5)}
+.admin-row:last-child{border-bottom:none}
+.prize-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.prize-pos{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--gold);width:24px;text-align:center;flex-shrink:0}
+.prize-input{flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text);font-size:13px;font-family:'Exo 2',sans-serif;outline:none}
+.prize-input:focus{border-color:var(--accent)}
+.bracket-slot-edit{padding:8px 10px;font-size:12px;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--border)}
+.bracket-slot-edit:last-child{border-bottom:none}
+.bracket-slot-edit.winner-e{background:rgba(16,185,129,.15)}
+.bracket-name-input{flex:1;background:transparent;border:none;color:var(--text);font-size:12px;font-family:'Exo 2',sans-serif;outline:none}
+.bracket-name-input::placeholder{color:var(--text2)}
+.win-btn{background:var(--border);border:none;border-radius:4px;width:22px;height:22px;cursor:pointer;font-size:10px;color:var(--text2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.win-btn.active{background:var(--green);color:white}
+.league-tabs{display:flex;background:var(--bg2);border-radius:8px;padding:3px;margin:0 16px 12px;gap:3px}
+.league-tab{flex:1;padding:7px 4px;text-align:center;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;color:var(--text2);transition:all .2s;font-family:'Rajdhani',sans-serif}
+.league-tab.active{background:var(--accent2);color:white}
+.ranking-card{margin:0 16px 12px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+/* PROMO SPLASH */
+.promo-overlay{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+.promo-carousel{width:100%;max-width:400px;position:relative}
+.promo-slide{display:none;animation:fadeInUp .4s ease}
+.promo-slide.active{display:block}
+.promo-slide img{width:100%;border-radius:var(--r);max-height:60vh;object-fit:cover}
+.promo-title{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;text-align:center;margin-top:16px;color:white}
+.promo-dots{display:flex;gap:8px;justify-content:center;margin-top:16px}
+.promo-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:all .2s}
+.promo-dot.active{background:var(--accent);width:24px;border-radius:4px}
+.promo-nav{display:flex;gap:12px;margin-top:20px;width:100%}
+.promo-skip{background:transparent;border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:12px;color:rgba(255,255,255,.6);font-size:13px;font-family:'Rajdhani',sans-serif;cursor:pointer;flex:1}
+.promo-next{background:var(--accent);border:none;border-radius:8px;padding:12px;color:white;font-size:14px;font-weight:600;font-family:'Rajdhani',sans-serif;cursor:pointer;flex:2}
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--border);display:flex;padding:8px 0 max(8px,env(safe-area-inset-bottom));z-index:100}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0;cursor:pointer;transition:color .2s;color:var(--text2);font-size:10px;font-weight:500}
+.nav-item.active{color:var(--accent)}
+.nav-icon{font-size:20px;transition:transform .2s}
+.nav-item.active .nav-icon{transform:scale(1.1)}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 20px;font-size:13px;white-space:nowrap;z-index:999;opacity:0;transition:all .3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.success{border-color:var(--green);color:var(--green)}
+.toast.error{border-color:var(--accent);color:var(--accent)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:none;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:20px 20px 0 0;padding:24px;width:100%;max-width:500px;max-height:88vh;overflow-y:auto;position:relative}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px}
+.modal-title{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;margin-bottom:16px}
+.modal-close{position:absolute;top:20px;right:20px;background:var(--bg3);border:1px solid var(--border);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px}
+.loading-overlay{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px}
+.spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeInUp .4s ease forwards}
+</style>
+</head>
+<body>
+<div class="loading-overlay" id="loading"><div class="spinner"></div><div style="font-size:13px;color:var(--text2)">Caricamento...</div></div>
+
+<!-- PROMO SPLASH -->
+<div class="promo-overlay" id="promo-overlay" style="display:none">
+  <div class="promo-carousel" id="promo-carousel"></div>
+  <div class="promo-dots" id="promo-dots"></div>
+  <div class="promo-nav" style="max-width:400px;width:100%">
+    <button class="promo-skip" onclick="closePromo()">SALTA</button>
+    <button class="promo-next" id="promo-next-btn" onclick="promoNext()">AVANTI →</button>
+  </div>
+</div>
+
+<div id="app">
+<div class="screen" id="auth-screen">
+  <div class="auth-logo fade-in"><div class="logo-mark">GL</div><h1>GAMING LOUNGE</h1><p>Asti Centro</p></div>
+  <div class="auth-card fade-in">
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Accedi</div>
+      <div class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Registrati</div>
+    </div>
+    <div id="form-login">
+      <div class="form-group"><label>Email</label><input type="email" id="login-email" placeholder="la-tua@email.com" autocomplete="email"></div>
+      <div class="form-group"><label>Password</label><input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"></div>
+      <button class="btn-primary" onclick="doLogin()" id="btn-login">ACCEDI</button>
+      <div class="auth-msg" id="login-msg"></div>
+    </div>
+    <div id="form-register" style="display:none">
+      <div class="form-group"><label>Username</label><input type="text" id="reg-username" placeholder="il-tuo-nickname"></div>
+      <div class="form-group"><label>Email</label><input type="email" id="reg-email" placeholder="la-tua@email.com" autocomplete="email"></div>
+      <div class="form-group"><label>Password</label><input type="password" id="reg-pass" placeholder="min 6 caratteri"></div>
+      <button class="btn-primary" onclick="doRegister()" id="btn-register">CREA ACCOUNT</button>
+      <div class="auth-msg" id="register-msg"></div>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="main-screen">
+  <div class="topbar">
+    <div class="topbar-logo">GL<span>●</span>ASTI</div>
+    <div class="topbar-right">
+      <div class="notif-btn" onclick="requestNotifications()">🔔<div class="notif-dot" id="notif-dot"></div></div>
+      <div class="avatar" id="topbar-avatar" onclick="switchTab('profilo')">?</div>
+    </div>
+  </div>
+  <div class="content">
+
+    <!-- HOME -->
+    <div class="tab-content active" id="tab-home">
+      <div class="hero-banner">
+        <div class="hero-greeting">Bentornato,</div>
+        <div class="hero-name">GIOCATORE <span id="hero-username">—</span></div>
+        <div style="font-size:13px;color:var(--text2);margin-top:4px;position:relative">Pronto per la prossima sfida?</div>
+      </div>
+      <div class="points-bar">
+        <div class="points-left"><div style="font-size:24px">🕐</div><div><div class="points-label">Ore di gioco</div><div class="points-value" id="user-ore">0h</div></div></div>
+        <button class="btn-sm" onclick="switchTab('buoni')">I MIEI BUONI</button>
+      </div>
+      <div class="section-title" style="margin-top:4px"><span>▸</span> LE TUE STATS</div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon">🎮</div><div class="stat-val" id="stat-tornei">0</div><div class="stat-lbl">Tornei giocati</div></div>
+        <div class="stat-card"><div class="stat-icon">🕐</div><div class="stat-val" id="stat-ore">0h</div><div class="stat-lbl">Ore totali</div></div>
+      </div>
+      <div class="section-title"><span>▸</span> PROSSIMO TORNEO</div>
+      <div class="tournament-hero">
+        <div class="tourn-badge">🎮 IN APERTURA</div>
+        <div class="tourn-title" id="next-tourn-title">—</div>
+        <div class="tourn-info" id="next-tourn-info">Caricamento...</div>
+        <div class="tourn-meta" id="next-tourn-meta"></div>
+        <button class="btn-accent" onclick="switchTab('tornei')">ISCRIVITI ORA →</button>
+      </div>
+      <div class="section-title"><span>▸</span> TOP 3 ORE</div>
+      <div style="padding:0 16px" id="home-leaderboard"><div style="text-align:center;padding:20px;color:var(--text2);font-size:13px">Caricamento...</div></div>
+      <div style="padding:8px 16px 16px"><button class="btn-sm" style="width:100%" onclick="switchTab('classifica')">CLASSIFICA COMPLETA →</button></div>
+    </div>
+
+    <!-- TORNEI -->
+    <div class="tab-content" id="tab-tornei">
+      <div style="padding:16px 16px 0"><div style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700">TORNEI</div><div style="font-size:13px;color:var(--text2);margin-top:2px">Iscriviti e vinci premi</div></div>
+      <div class="filter-bar">
+        <div class="filter-chip active" onclick="filterT('all',this)">Tutti</div>
+        <div class="filter-chip" onclick="filterT('open',this)">Aperti</div>
+        <div class="filter-chip" onclick="filterT('ongoing',this)">In corso</div>
+        <div class="filter-chip" onclick="filterT('closed',this)">Conclusi</div>
+      </div>
+      <div id="tournaments-list"><div style="text-align:center;padding:40px;color:var(--text2);font-size:13px">Caricamento...</div></div>
+    </div>
+
+    <!-- CLASSIFICA -->
+    <div class="tab-content" id="tab-classifica">
+      <div style="padding:16px 16px 0"><div style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700">CLASSIFICA</div></div>
+      <div class="league-tabs" style="margin-top:12px">
+        <div class="league-tab active" onclick="switchClassifica('ore',this)">Ore di Gioco</div>
+        <div class="league-tab" onclick="switchClassifica('premi',this)">Premi Mensili</div>
+      </div>
+      <div id="class-ore"><div style="padding:0 16px" id="full-leaderboard"><div style="text-align:center;padding:40px;color:var(--text2);font-size:13px">Caricamento...</div></div></div>
+      <div id="class-premi" style="display:none"><div id="rankings-list"><div style="text-align:center;padding:40px;color:var(--text2);font-size:13px">Caricamento...</div></div></div>
+    </div>
+
+    <!-- PRENOTA -->
+    <div class="tab-content" id="tab-prenota">
+      <div style="padding:16px 16px 8px"><div style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700">PRENOTA</div><div style="font-size:13px;color:var(--text2);margin-top:2px" id="prenota-sub">Scegli il gioco</div></div>
+      <div id="step-game">
+        <div style="padding:0 16px;margin-bottom:10px"><div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px">Giochi disponibili</div></div>
+        <div id="games-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-bottom:16px"><div style="text-align:center;padding:20px;color:var(--text2);font-size:13px;grid-column:1/-1">Caricamento...</div></div>
+      </div>
+      <div id="step-date" style="display:none">
+        <div style="padding:0 16px;margin-bottom:10px"><button class="btn-sm" onclick="resetBooking()" style="padding:5px 10px;font-size:11px">← Giochi</button></div>
+        <div style="background:rgba(233,69,96,.08);border:1px solid rgba(233,69,96,.2);border-radius:8px;margin:0 16px 14px;padding:12px 14px;display:flex;align-items:center;gap:12px">
+          <div style="font-size:28px" id="sel-game-icon">🎮</div>
+          <div><div style="font-size:15px;font-weight:600" id="sel-game-name">—</div><div style="font-size:12px;color:var(--text2)" id="sel-station-name">—</div></div>
+        </div>
+        <div class="date-nav">
+          <button class="date-nav-btn" onclick="changeDate(-1)">‹</button>
+          <div class="date-display"><span class="day-name" id="day-name">OGGI</span><span id="date-display">—</span></div>
+          <button class="date-nav-btn" onclick="changeDate(1)">›</button>
+        </div>
+        <div class="slots-container" id="slots-container"></div>
+      </div>
+      <div class="booking-confirm-bar" id="confirm-bar">
+        <div class="booking-summary" id="confirm-summary"></div>
+        <button class="btn-primary" onclick="confirmBooking()">CONFERMA PRENOTAZIONE</button>
+      </div>
+      <div style="padding:16px 16px 0;margin-top:8px">
+        <div style="font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;letter-spacing:2px;color:var(--text2);text-transform:uppercase;margin-bottom:10px"><span style="color:var(--accent)">▸</span> LE MIE PRENOTAZIONI</div>
+        <div id="my-bookings"><div style="text-align:center;padding:20px;color:var(--text2);font-size:13px">Nessuna prenotazione</div></div>
+      </div>
+    </div>
+
+    <!-- BUONI -->
+    <div class="tab-content" id="tab-buoni">
+      <div style="padding:16px 16px 0"><div style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700">I MIEI BUONI</div></div>
+      <div style="padding:16px" id="vouchers-list"><div style="text-align:center;padding:40px;color:var(--text2);font-size:13px">Nessun buono ancora</div></div>
+    </div>
+
+    <!-- PROFILO -->
+    <div class="tab-content" id="tab-profilo">
+      <div class="profile-header">
+        <div class="profile-avatar-big" id="profile-avatar-big">?</div>
+        <div class="profile-username" id="profile-username">—</div>
+        <div class="profile-email" id="profile-email">—</div>
+        <div class="profile-level" id="profile-level">NOVICE</div>
+      </div>
+      <div class="client-code-display">
+        <div><div class="client-code-label">Il tuo codice cliente</div><div class="client-code-val" id="client-code">——</div></div>
+        <div style="font-size:11px;color:var(--text2);text-align:right">Mostralo<br>all'admin</div>
+      </div>
+      <div class="profile-stats">
+        <div class="ps-item"><div class="ps-val" id="ps-tornei">0</div><div class="ps-lbl">Tornei</div></div>
+        <div class="ps-item"><div class="ps-val" id="ps-ore">0h</div><div class="ps-lbl">Ore gioco</div></div>
+        <div class="ps-item"><div class="ps-val" id="ps-buoni">0</div><div class="ps-lbl">Buoni</div></div>
+      </div>
+      <div class="menu-list">
+        <div class="menu-item" onclick="switchTab('prenota')"><div class="menu-item-icon">📅</div><div class="menu-item-text">Le mie prenotazioni</div><div class="menu-item-arrow">›</div></div>
+        <div class="menu-item" onclick="switchTab('buoni')"><div class="menu-item-icon">🎟️</div><div class="menu-item-text">I miei buoni</div><div class="menu-item-arrow">›</div></div>
+        <div class="menu-item" onclick="requestNotifications()"><div class="menu-item-icon">🔔</div><div class="menu-item-text" id="notif-menu-text">Attiva notifiche</div><div class="menu-item-arrow">›</div></div>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">ESCI DALL'ACCOUNT</button>
+    </div>
+
+    <!-- ADMIN -->
+    <div class="tab-content" id="tab-admin">
+      <div style="padding:16px 16px 0;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div><div style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700">🛡️ ADMIN</div></div>
+        <button class="btn-sm" onclick="loadAdminData()">↻</button>
+      </div>
+      <div class="admin-tabs">
+        <div class="admin-tab active" onclick="showAdminPage('overview',this)">Stats</div>
+        <div class="admin-tab" onclick="showAdminPage('bookings',this)">Prenotaz.</div>
+        <div class="admin-tab" onclick="showAdminPage('games',this)">Giochi</div>
+        <div class="admin-tab" onclick="showAdminPage('ore',this)">Ore</div>
+        <div class="admin-tab" onclick="showAdminPage('promo',this)">Promo</div>
+        <div class="admin-tab" onclick="showAdminPage('tournaments',this)">Tornei</div>
+        <div class="admin-tab" onclick="showAdminPage('bracket',this)">Bracket</div>
+        <div class="admin-tab" onclick="showAdminPage('rankings',this)">Classifica</div>
+        <div class="admin-tab" onclick="showAdminPage('vouchers',this)">Buoni</div>
+        <div class="admin-tab" onclick="showAdminPage('users',this)">Utenti</div>
+      </div>
+
+      <div class="admin-page active" id="admin-overview">
+        <div class="stat-row-admin">
+          <div class="stat-mini"><div class="stat-mini-val" id="adm-ricavi">—</div><div class="stat-mini-lbl">€ Oggi</div></div>
+          <div class="stat-mini"><div class="stat-mini-val" id="adm-pren">—</div><div class="stat-mini-lbl">Prenotazioni</div></div>
+          <div class="stat-mini"><div class="stat-mini-val" id="adm-utenti">—</div><div class="stat-mini-lbl">Utenti</div></div>
+          <div class="stat-mini"><div class="stat-mini-val" id="adm-buoni-att">—</div><div class="stat-mini-lbl">Buoni Attivi</div></div>
+        </div>
+        <div class="admin-section">
+          <div class="admin-section-title">PRENOTAZIONI DI OGGI</div>
+          <div id="adm-today-list"><div style="text-align:center;padding:12px;color:var(--text2);font-size:13px">Nessuna</div></div>
+        </div>
+        <div class="admin-section">
+          <div class="admin-section-title">VALIDA BUONO CLIENTE</div>
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <input type="text" id="client-code-search" maxlength="4" placeholder="0000" style="flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-size:18px;font-family:'Rajdhani',sans-serif;letter-spacing:4px;text-align:center;outline:none">
+            <button class="btn-sm" onclick="findClientVouchers()">CERCA</button>
+          </div>
+          <div id="client-voucher-result"></div>
+        </div>
+      </div>
+
+      <div class="admin-page" id="admin-bookings">
+        <div style="padding:0 16px;margin-bottom:12px"><div class="form-group"><label>Data</label><input type="date" id="adm-f-date" onchange="loadAdminBookings()"></div></div>
+        <div class="admin-section">
+          <div class="admin-section-title">PRENOTAZIONI <span id="adm-book-count" style="font-size:11px;color:var(--text2);font-weight:400"></span></div>
+          <div id="adm-bookings-list"><div style="text-align:center;padding:12px;color:var(--text2);font-size:13px">Seleziona una data</div></div>
+        </div>
+      </div>
+
+      <div class="admin-page" id="admin-games">
+        <div class="admin-section">
+          <div class="admin-section-title">AGGIUNGI GIOCO</div>
+          <div class="form-group"><label>Postazione</label>
+            <select id="ag-station">
+              <option value="PS5-1">PS5 #1</option><option value="PS5-2">PS5 #2</option>
+              <option value="PS5-3">PS5 #3</option><option value="PS5-4">PS5 #4</option>
+              <option value="PS5-5">PS5 #5</option><option value="PS5-6">PS5 #6</option>
+              <option value="SIM-1">Simulatore 1</option><option value="SIM-2">Simulatore 2</option>
+              <option value="VR-1">VR #1</option><option value="VR-2">VR #2</option>
+              <option value="PRIVATA">Stanza Privata</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Nome gioco</label><input type="text" id="ag-name" placeholder="es. EA FC 26"></div>
+          <button class="btn-primary" onclick="addStationGame()">AGGIUNGI</button>
+        </div>
+        <div class="admin-section">
+          <div class="admin-section-title">GIOCHI PER POSTAZIONE</div>
+          <div id="adm-games-list"><div style="text-align:center;padding:12px;color:var(--text2);font-size:13px">Caricamento...</div></div>
+        </div>
+      </div>
+
+      <div class="admin-page" id="admin-ore">
+        <div class="admin-section">
+          <div class="admin-section-title">AGGIUNGI ORE IN SEDE</div>
+          <div class="form-group"><label>Email utente</label><input type="email" id="ore-email" placeholder="utente@email.com"></div>
+          <div class="form-group"><label>Ore da aggiungere</label><input type="number" id="ore-amount" value="1" min="0.5" step="0.5"></div>
+          <button class="btn-primary" onclick="addOreManually()">AGGIUNGI ORE</button>
+        </div>
+        <div class="admin-section">
+          <div class="admin-section-title">CLASSIFICA ORE</div>
+          <div id="adm-ore-list"><div style="text-align:center;padding:12px;color:var(--text2);font-size:13px">Caricamento...</div></div>
+        </div>
+      </div>
+
+      <div class="admin-page" id="admin-promo">
+        <div class="admin-section">
+          <div class="admin-section-title">CARICA PROMO</div>
+          <div class="form-group"><label>Titolo (opzionale)</label><input type="text" id="promo-title" placeholder="es. Torneo FIFA Sabato!"></div>
+          <div class="form-group"><label>Immagine</label>
+            <input type="file" id="promo-file" accept="image/*" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--text);font-size:13px;width:100%">
+          </div>
+          <button class="btn-primary" onclick="uploadPromo()">CARICA PROMO</button>
+          <div id="promo-upload-status" style="margin-top:10px;font-size:13px"></div>
+        </div>
+        <div class="admin-section">
+          <div class="admin-section-title">PROMO ATTIVE</div>
+          <div id="adm-promos-list"><div style="text-align:center;padding:12px;color:var(--text2);font-size:13px">Caricamento...</div></div>
+        </div>
+      </div>
+
+      <div class="admin-page" id="admin-tournaments">
+        <div class="admin-section">
+          <div class="admin-section-title">CREA TORNEO</div>
+          <div class="form-group"><label>Nome</label><input type="text" id="at-name" placeholder="EA FC 26 — Cup Maggio"></div>
+          <div class="form-group"><label>Gioco</label><input type="text" id="at-game" placeholder="EA FC 26"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="form-group"><label>Data</label><input type="date" id="at-date"></div>
+            <div class="form-group"><label>Orario</label><input type="time" id="at-time" value="18:00"></div>
+            <div class="form-group"><label>Max partecipanti</label><input type="number" id="at-max" value="16"></div>
+            <div class="form-group"><label>Quota (€)</label><input type="number" id="at-fee" value="10"></div>
+          </div>
+          <div class="admin-section-title" style="margin-bottom:8px;margin-top:4px">PREMI</div>
+          <div id="at-prizes-container">
+            <div class="prize-row"><div class="prize-pos">1°</div><input class="prize-input" placeholder="es. Buono €50" data-pos="1"></div>
+            <div class="prize-row"><div class="prize-pos">2°</div><input class="prize-input" placeholder="es. Buono €30" data-pos="2"></div>
+            <div class="prize-row"><div class="prize-pos">3°</div><input class="prize-input" placeholder="es. Buono €15" data-pos="3"></div>
+          </div>
+          <div style="display:flex;gap:8px;margin:8px 0 12px">
+            <button class="btn-sm" onclick="addPrizeRow('at-prizes-container')">+ Pos.</button>
+            <button class="btn-sm" onclick="removePrizeRow('at-prizes-container')">- Pos.</button>
+          </div>
+          <button class="btn-primary" onclick="createTournament()">CREA TORNEO</button>
+        </div>
+        <div class="admin-section">
+          <div class="admin-section-title">TORNEI</div>
+          <div id="adm-tournaments-list"><div style="text-align:center;padding:12px;color:var(--text2);font-size:13px">Caricamento...</div></div>
+        </div>
+      </div>
+
+      <div class="admin-page" id="admin-bracket">
+        <div style="padding:0 16px;margin-bottom:12px">
+          <div class="form-group"><label>Seleziona Torneo</label>
+            <select id="bracket-select" onchange="loadBracketEditor()"><option value="">-- Seleziona --</option></select>
+          </div>
+        </div>
+        <div class="admin-section">
+          <div class="admin-section-title">BRACKET <button class="btn-sm" onclick="saveBracket()" style="font-size:11px;padding:5px 10px">💾 Salva</button></div>
+          <div id="bracket-editor-container"><div style="text-align:center;padding:12px;color:var(--text2);font-size:13px">Seleziona un torneo</div></div>
+        </div>
+      </div>
+
+      <div class="admin-page" id="admin-rankings">
+        <div class="admin-section">
+          <div class="admin-section-title">CREA CLASSIFICA MENSILE</div>
+          <div class="form-group"><label>Nome</label><input type="text" id="rk-name" placeholder="Classifica Maggio 2025"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="form-group"><label>Inizio</label><input type="date" id="rk-start"></div>
+            <div class="form-group"><label>Fine</label><input type="date" id="rk-end"></div>
+          </div>
+          <div class="prize-row"><div class="prize-pos">1°</div><input class="prize-input" id="rk-prize1" placeholder="es. Buono €100 + Coppa"></div>
+          <div class="prize-row" style="margin-top:8px"><div class="prize-pos">2°</div><input class="prize-input" id="rk-prize2" placeholder="es. Buono €50"></div>
+          <div class="prize-row" style="margin-top:8px"><div class="prize-pos">3°</div><input class="prize-input" id="rk-prize3" placeholder="es. Buono €25"></div>
+          <button class="btn-primary" style="margin-top:12px" onclick="createRanking()">CREA CLASSIFICA</button>
+        </div>
+        <div class="admin-section">
+          <div class="admin-section-title">CLASSIFICHE</div>
+          <div id="adm-rankings-list"><div style="text-align:center;padding:12px;color:var(--text2);font-size:13px">Caricamento...</div></div>
+        </div>
+      </div>
+
+      <div class="admin-page" id="admin-vouchers">
+        <div class="admin-section">
+          <div class="admin-section-title">EMETTI BUONO</div>
+          <div class="form-group"><label>Email utente</label><input type="email" id="av-email" placeholder="utente@email.com"></div>
+          <div class="form-group"><label>Importo (€)</label><input type="number" id="av-amount" value="30"></div>
+          <div class="form-group"><label>Motivo</label><input type="text" id="av-reason" placeholder="Vittoria torneo"></div>
+          <button class="btn-primary" onclick="createVoucher()">EMETTI BUONO</button>
+        </div>
+        <div class="admin-section">
+          <div class="admin-section-title">TUTTI I BUONI</div>
+          <div id="adm-vouchers-list"><div style="text-align:center;padding:12px;color:var(--text2);font-size:13px">Caricamento...</div></div>
+        </div>
+      </div>
+
+      <div class="admin-page" id="admin-users">
+        <div class="admin-section">
+          <div class="admin-section-title">UTENTI REGISTRATI</div>
+          <div id="adm-users-list"><div style="text-align:center;padding:12px;color:var(--text2);font-size:13px">Caricamento...</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="bottom-nav" id="bottom-nav">
+    <div class="nav-item active" id="nav-home" onclick="switchTab('home')"><div class="nav-icon">🏠</div><div>Home</div></div>
+    <div class="nav-item" id="nav-tornei" onclick="switchTab('tornei')"><div class="nav-icon">🏆</div><div>Tornei</div></div>
+    <div class="nav-item" id="nav-classifica" onclick="switchTab('classifica')"><div class="nav-icon">📊</div><div>Classifica</div></div>
+    <div class="nav-item" id="nav-prenota" onclick="switchTab('prenota')"><div class="nav-icon">🎮</div><div>Prenota</div></div>
+    <div class="nav-item" id="nav-profilo" onclick="switchTab('profilo')"><div class="nav-icon">👤</div><div>Profilo</div></div>
+    <div class="nav-item" id="nav-admin" style="display:none" onclick="switchTab('admin')"><div class="nav-icon">🛡️</div><div>Admin</div></div>
+  </div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="modal-overlay" id="modal-duration">
+  <div class="modal"><div class="modal-handle"></div><div class="modal-title" id="dur-title">Scegli durata</div><div id="dur-options"></div></div>
+</div>
+<div class="modal-overlay" id="modal-tournament">
+  <div class="modal"><div class="modal-handle"></div><div class="modal-close" onclick="closeModal('modal-tournament')">✕</div><div class="modal-title" id="modal-tourn-title">Torneo</div><div id="modal-tourn-body"></div></div>
+</div>
+<div class="modal-overlay" id="modal-bracket-view">
+  <div class="modal" style="max-height:90vh"><div class="modal-handle"></div><div class="modal-close" onclick="closeModal('modal-bracket-view')">✕</div><div class="modal-title" id="bracket-view-title">Tabellone</div><div id="bracket-view-body"></div></div>
+</div>
+<script>
+const SURL='https://lojcsjsnwyxggfylguei.supabase.co';
+const SKEY='sb_publishable_2qD9UjedDM8O0kVYn6fY2w_pDgGoAND';
+const sb=window.supabase.createClient(SURL,SKEY,{auth:{persistSession:true,autoRefreshToken:true,storage:localStorage}});
+
+let currentUser=null,currentProfile=null,allTournaments=[];
+let currentDate=new Date(),selectedStation=null,selectedGame=null,selectedSlotTime=null,selectedDuration=0,selectedPrice=0;
+let bracketData={},currentBracketId=null,promoSlides=[],promoIdx=0;
+
+const STATIONS={'PS5-1':{n:'PS5 #1',i:'🎮',type:'ps5'},'PS5-2':{n:'PS5 #2',i:'🎮',type:'ps5'},'PS5-3':{n:'PS5 #3',i:'🎮',type:'ps5'},'PS5-4':{n:'PS5 #4',i:'🎮',type:'ps5'},'PS5-5':{n:'PS5 #5',i:'🎮',type:'ps5'},'PS5-6':{n:'PS5 #6',i:'🎮',type:'ps5'},'SIM-1':{n:'Simulatore 1',i:'🏎️',type:'sim'},'SIM-2':{n:'Simulatore 2',i:'🏎️',type:'sim'},'VR-1':{n:'VR #1',i:'🥽',type:'vr'},'VR-2':{n:'VR #2',i:'🥽',type:'vr'},'PRIVATA':{n:'Stanza Privata',i:'🔒',type:'ps5'}};
+
+function getPrice(sid,mins,wk){
+  const t=STATIONS[sid]?.type||'ps5';
+  if(t==='ps5'){return mins===30?(wk?7:6):mins===60?(wk?12:10):(wk?20:18);}
+  return mins===30?(wk?8:7):mins===60?(wk?14:12):20;
+}
+
+const GICONS={'EA FC 26':'⚽','FIFA':'⚽','GTA V':'🚗','GTA':'🚗','NBA 2K':'🏀','Gran Turismo':'🏎️','F1':'🏁','Mortal Kombat':'⚔️','Beat Saber':'🎵','Superhot':'🥽','Fall Guys':'🎪','It Takes Two':'👫','Rocket League':'🚀'};
+function gIcon(n){if(!n)return'🎮';for(const[k,v]of Object.entries(GICONS)){if(n.toLowerCase().includes(k.toLowerCase()))return v;}return'🎮';}
+
+function isWk(d){const day=d.getDay();return day===0||day===5||day===6;}
+function getHours(d){const day=d.getDay();return(day===5||day===6)?gen30('15:00','23:00'):gen30('15:00','21:00');}
+function gen30(s,e){const sl=[];let[sh,sm]=s.split(':').map(Number);const[eh,em]=e.split(':').map(Number);while(sh*60+sm<eh*60+em){sl.push(`${String(sh).padStart(2,'0')}:${String(sm).padStart(2,'0')}`);sm+=30;if(sm>=60){sm-=60;sh++;}}return sl;}
+function addM(t,m){let[h,mn]=t.split(':').map(Number);mn+=m;while(mn>=60){mn-=60;h++;}return`${String(h).padStart(2,'0')}:${String(mn).padStart(2,'0')}`;}
+function isToday(d){const t=new Date();return d.getFullYear()===t.getFullYear()&&d.getMonth()===t.getMonth()&&d.getDate()===t.getDate();}
+function fmtOre(h){if(!h||h===0)return'0h';const o=Math.floor(h),m=Math.round((h-o)*60);return m>0?`${o}h ${m}min`:`${o}h`;}
+function fmtDate(d){if(!d)return'—';return new Date(d+'T12:00:00').toLocaleDateString('it-IT',{day:'numeric',month:'short',year:'numeric'});}
+
+async function init(){
+  // Gestisce redirect email con token
+  const hash=window.location.hash;
+  if(hash&&hash.includes('access_token')){
+    const params=new URLSearchParams(hash.substring(1));
+    const accessToken=params.get('access_token');
+    const refreshToken=params.get('refresh_token');
+    if(accessToken){
+      const{data,error}=await sb.auth.setSession({access_token:accessToken,refresh_token:refreshToken});
+      if(!error&&data.user){
+        window.history.replaceState(null,'',window.location.pathname);
+        await loadUser(data.user);showMain();
+        document.getElementById('loading').style.display='none';
+        return;
+      }
+    }
+  }
+  const{data:{session}}=await sb.auth.getSession();
+  if(session){await loadUser(session.user);showMain();}
+  else showAuth();
+  document.getElementById('loading').style.display='none';
+  updateDateDisplay();
+  if('Notification' in window&&Notification.permission==='granted')document.getElementById('notif-dot').style.display='block';
+  // Service Worker
+  if('serviceWorker' in navigator){navigator.serviceWorker.register('/gl-asti/sw.js').catch(()=>{});}
+}
+
+function showAuth(){document.getElementById('auth-screen').classList.add('active');document.getElementById('main-screen').classList.remove('active');}
+function showMain(){
+  document.getElementById('auth-screen').classList.remove('active');
+  document.getElementById('main-screen').classList.add('active');
+  loadHomeData();loadTournaments();loadFullLeaderboard();loadGamesGrid();
+  // Mostra promo dopo 1 secondo
+  setTimeout(()=>loadAndShowPromo(),1000);
+}
+
+// PROMO
+async function loadAndShowPromo(){
+  try{
+    const{data}=await sb.from('promos').select('*').eq('active',true).order('order_num',{ascending:true});
+    if(!data||!data.length)return;
+    promoSlides=data;promoIdx=0;
+    renderPromoSlides();
+    document.getElementById('promo-overlay').style.display='flex';
+  }catch(e){}
+}
+
+function renderPromoSlides(){
+  const slidesEl=document.getElementById('promo-slides');
+  const dotsEl=document.getElementById('promo-dots');
+  slidesEl.innerHTML=promoSlides.map((p,i)=>`<div class="promo-slide ${i===0?'active':''}" id="ps-${i}">
+    ${p.image_url?`<img src="${p.image_url}" alt="${p.title||'Promo'}" onerror="this.style.display='none'">`:'<div style="height:200px;background:linear-gradient(135deg,var(--accent2),var(--accent));border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:48px">🎮</div>'}
+    ${p.title?`<div class="promo-title">${p.title}</div>`:''}
+  </div>`).join('');
+  dotsEl.innerHTML=promoSlides.map((_,i)=>`<div class="promo-dot ${i===0?'active':''}" onclick="goToPromo(${i})"></div>`).join('');
+  updatePromoNav();
+}
+
+function goToPromo(idx){
+  document.querySelectorAll('.promo-slide').forEach((s,i)=>s.classList.toggle('active',i===idx));
+  document.querySelectorAll('.promo-dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+  promoIdx=idx;updatePromoNav();
+}
+
+function updatePromoNav(){
+  const btn=document.getElementById('promo-next-btn');
+  btn.textContent=promoIdx>=promoSlides.length-1?'Inizia →':'Avanti →';
+}
+
+function promoNext(){
+  if(promoIdx>=promoSlides.length-1){closePromo();return;}
+  goToPromo(promoIdx+1);
+}
+
+function closePromo(){document.getElementById('promo-overlay').style.display='none';}
+
+// UPLOAD PROMO
+document.addEventListener('DOMContentLoaded',()=>{
+  const fi=document.getElementById('promo-file');
+  if(fi)fi.addEventListener('change',e=>{
+    const f=e.target.files[0];if(!f)return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      document.getElementById('promo-preview-img').src=ev.target.result;
+      document.getElementById('promo-preview').style.display='block';
+    };
+    reader.readAsDataURL(f);
+  });
+  const atd=document.getElementById('at-date');if(atd)atd.min=new Date().toISOString().split('T')[0];
+  init();
+});
+
+async function uploadPromo(){
+  const file=document.getElementById('promo-file').files[0];
+  const title=document.getElementById('promo-title').value.trim();
+  if(!file){showToast('Seleziona un immagine','error');return;}
+  showToast('Caricamento...','');
+  try{
+    const ext=file.name.split('.').pop();
+    const fileName=`promo-${Date.now()}.${ext}`;
+    const{data:upData,error:upErr}=await sb.storage.from('promos').upload(fileName,file,{contentType:file.type});
+    if(upErr)throw upErr;
+    const{data:urlData}=sb.storage.from('promos').getPublicUrl(fileName);
+    const imageUrl=urlData.publicUrl;
+    const{error}=await sb.from('promos').insert([{image_url:imageUrl,title,active:true,order_num:0}]);
+    if(error)throw error;
+    showToast('Promo caricata!','success');
+    document.getElementById('promo-file').value='';
+    document.getElementById('promo-title').value='';
+    document.getElementById('promo-preview').style.display='none';
+    loadAdminPromo();
+  }catch(e){
+    // Fallback: salva solo URL testo se storage non configurato
+    showToast('Configura Supabase Storage per upload immagini','error');
+  }
+}
+
+async function loadAdminPromo(){
+  const list=document.getElementById('adm-promo-list');
+  try{const{data}=await sb.from('promos').select('*').order('order_num',{ascending:true});
+    if(!data||!data.length){list.innerHTML='<div style="text-align:center;padding:12px;color:var(--text2);font-size:13px">Nessuna promo</div>';return;}
+    list.innerHTML=data.map(p=>`<div class="admin-row"><div style="display:flex;align-items:center;gap:10px">${p.image_url?`<img src="${p.image_url}" style="width:48px;height:48px;border-radius:6px;object-fit:cover">`:'<div style="width:48px;height:48px;border-radius:6px;background:var(--bg3);display:flex;align-items:center;justify-content:center">🎮</div>'}<div><div style="font-size:13px;font-weight:600">${p.title||'Senza titolo'}</div><div style="font-size:11px;color:${p.active?'var(--green)':'var(--text2)'}">${p.active?'Attiva':'Inattiva'}</div></div></div><div style="display:flex;gap:6px"><button class="btn-sm" style="font-size:10px;padding:4px 8px" onclick="togglePromo(${p.id},${!p.active})">${p.active?'Disattiva':'Attiva'}</button><button class="btn-danger" onclick="deletePromo(${p.id})">✕</button></div></div>`).join('');
+  }catch(e){}
+}
+
+async function togglePromo(id,val){await sb.from('promos').update({active:val}).eq('id',id);showToast(val?'Attivata':'Disattivata','success');loadAdminPromo();}
+async function deletePromo(id){if(!confirm('Eliminare?'))return;await sb.from('promos').delete().eq('id',id);showToast('Eliminata','success');loadAdminPromo();}
+
+function switchAuthTab(t){document.getElementById('tab-login').classList.toggle('active',t==='login');document.getElementById('tab-register').classList.toggle('active',t==='register');document.getElementById('form-login').style.display=t==='login'?'block':'none';document.getElementById('form-register').style.display=t==='register'?'block':'none';}
+
+async function doLogin(){
+  const email=document.getElementById('login-email').value.trim(),pass=document.getElementById('login-pass').value;
+  const msg=document.getElementById('login-msg'),btn=document.getElementById('btn-login');
+  if(!email||!pass){msg.textContent='Inserisci email e password';msg.className='auth-msg error';return;}
+  btn.disabled=true;btn.textContent='Accesso...';
+  const{data,error}=await sb.auth.signInWithPassword({email,password:pass});
+  if(error){msg.textContent='Email o password errati';msg.className='auth-msg error';btn.disabled=false;btn.textContent='ACCEDI';}
+  else{await loadUser(data.user);showMain();}
+}
+
+async function doRegister(){
+  const username=document.getElementById('reg-username').value.trim(),email=document.getElementById('reg-email').value.trim(),pass=document.getElementById('reg-pass').value;
+  const msg=document.getElementById('register-msg'),btn=document.getElementById('btn-register');
+  if(!username||!email||!pass){msg.textContent='Compila tutti i campi';msg.className='auth-msg error';return;}
+  if(pass.length<6){msg.textContent='Password minimo 6 caratteri';msg.className='auth-msg error';return;}
+  btn.disabled=true;btn.textContent='Registrazione...';
+  const{error}=await sb.auth.signUp({email,password:pass,options:{data:{username}}});
+  if(error){msg.textContent=error.message;msg.className='auth-msg error';btn.disabled=false;btn.textContent='CREA ACCOUNT';}
+  else{msg.textContent='Controlla la email per confermare.';msg.className='auth-msg success';btn.disabled=false;btn.textContent='CREA ACCOUNT';}
+}
+
+async function doLogout(){await sb.auth.signOut();currentUser=null;currentProfile=null;showAuth();}
+
+async function loadUser(user){
+  currentUser=user;
+  const username=user.user_metadata?.username||user.email.split('@')[0];
+  currentProfile={username,email:user.email,points:0,tornei:0,ore_gioco:0,is_admin:false,client_code:'——'};
+  try{const{data}=await sb.from('profiles').select('*').eq('id',user.id).single();if(data)currentProfile={...currentProfile,...data};}catch(e){}
+  updateUI();
+}
+
+function updateUI(){
+  if(!currentProfile)return;
+  const u=currentProfile.username||'—',i=u.charAt(0).toUpperCase();
+  document.getElementById('topbar-avatar').textContent=i;
+  document.getElementById('hero-username').textContent=u.toUpperCase();
+  const ore=currentProfile.ore_gioco||0;
+  document.getElementById('user-ore').textContent=fmtOre(ore);
+  document.getElementById('stat-tornei').textContent=currentProfile.tornei||0;
+  document.getElementById('stat-ore').textContent=fmtOre(ore);
+  document.getElementById('profile-avatar-big').textContent=i;
+  document.getElementById('profile-username').textContent=u;
+  document.getElementById('profile-email').textContent=currentProfile.email;
+  document.getElementById('ps-tornei').textContent=currentProfile.tornei||0;
+  document.getElementById('ps-ore').textContent=fmtOre(ore);
+  document.getElementById('client-code').textContent=currentProfile.client_code||'——';
+  document.getElementById('profile-level').textContent=ore>=100?'LEGGENDA':ore>=50?'PRO':ore>=20?'VETERAN':'NOVICE';
+  // Mostra tab admin solo agli admin
+  const adminNav=document.getElementById('nav-admin');
+  if(currentProfile.is_admin)adminNav.style.display='flex';
+  else adminNav.style.display='none';
+}
+
+async function loadHomeData(){loadHomeLeaderboard();loadVouchers(true);loadNextTournament();}
+
+async function loadNextTournament(){
+  try{const{data}=await sb.from('tournaments').select('*').eq('status','open').order('date',{ascending:true}).limit(1);
+    if(data&&data.length>0){const t=data[0];document.getElementById('next-tourn-title').textContent=t.name;document.getElementById('next-tourn-info').textContent=`${t.game} · ${t.max_participants-(t.current_participants||0)} posti liberi`;document.getElementById('next-tourn-meta').innerHTML=`<div class="tourn-meta-item"><span>Data</span><strong>${fmtDate(t.date)}</strong></div><div class="tourn-meta-item"><span>Orario</span><strong>${t.time||'—'}</strong></div>`;}
+    else{document.getElementById('next-tourn-title').textContent='Nessun torneo';document.getElementById('next-tourn-info').textContent='Torna presto!';}
+  }catch(e){}
+}
+
+async function loadHomeLeaderboard(){
+  const c=document.getElementById('home-leaderboard');
+  try{const{data}=await sb.from('profiles').select('username,ore_gioco').order('ore_gioco',{ascending:false}).limit(3);
+    if(!data||!data.length){c.innerHTML='<div style="text-align:center;padding:20px;color:var(--text2);font-size:13px">Nessun giocatore ancora</div>';return;}
+    const medals=['🥇','🥈','🥉'],ranks=['gold','silver','bronze'];
+    c.innerHTML=data.map((p,i)=>{const me=currentProfile&&p.username===currentProfile.username;return`<div class="lb-item ${me?'me':''}"><div class="lb-rank ${ranks[i]}">${medals[i]}</div><div class="lb-avatar">${p.username.charAt(0).toUpperCase()}</div><div class="lb-info"><div class="lb-name">${p.username}${me?' (Tu)':''}</div><div class="lb-sub">Gamer</div></div><div class="lb-pts">${fmtOre(p.ore_gioco||0)}</div></div>`;}).join('');
+  }catch(e){}
+}
+
+async function loadFullLeaderboard(){
+  const c=document.getElementById('full-leaderboard');
+  try{const{data}=await sb.from('profiles').select('username,ore_gioco,tornei').order('ore_gioco',{ascending:false}).limit(20);
+    if(!data||!data.length){c.innerHTML='<div style="text-align:center;padding:40px;color:var(--text2);font-size:13px">Nessun giocatore ancora</div>';return;}
+    const medals=['🥇','🥈','🥉'],ranks=['gold','silver','bronze'];
+    c.innerHTML=data.map((p,i)=>{const me=currentProfile&&p.username===currentProfile.username;return`<div class="lb-item ${me?'me':''}"><div class="lb-rank ${i<3?ranks[i]:''}">${i<3?medals[i]:'#'+(i+1)}</div><div class="lb-avatar">${p.username.charAt(0).toUpperCase()}</div><div class="lb-info"><div class="lb-name">${p.username}${me?' (Tu)':''}</div><div class="lb-sub">${p.tornei||0} tornei</div></div><div class="lb-pts">${fmtOre(p.ore_gioco||0)}</div></div>`;}).join('');
+  }catch(e){}
+}
+
+function switchClassifica(tab,el){
+  document.querySelectorAll('.league-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
+  document.getElementById('class-ore').style.display=tab==='ore'?'block':'none';
+  document.getElementById('class-premi').style.display=tab==='premi'?'block':'none';
+  if(tab==='premi')loadRankingsList();
+}
+
+async function loadRankingsList(){
+  const c=document.getElementById('rankings-list');
+  try{const{data}=await sb.from('rankings').select('*').order('period_start',{ascending:false});
+    if(!data||!data.length){c.innerHTML='<div style="text-align:center;padding:40px;color:var(--text2);font-size:13px">Nessuna classifica disponibile</div>';return;}
+    c.innerHTML=data.map(r=>`<div class="ranking-card"><div style="font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;margin-bottom:4px">${r.name}</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px">📅 ${fmtDate(r.period_start)} → ${fmtDate(r.period_end)}</div><div style="display:flex;flex-direction:column;gap:8px">${r.prize_1?`<div style="display:flex;align-items:center;gap:10px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:10px"><div style="font-size:20px">🥇</div><div><div style="font-size:11px;color:var(--text2)">1° POSTO</div><div style="font-size:14px;font-weight:600">${r.prize_1}</div></div></div>`:''} ${r.prize_2?`<div style="display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px"><div style="font-size:20px">🥈</div><div><div style="font-size:11px;color:var(--text2)">2° POSTO</div><div style="font-size:14px;font-weight:600">${r.prize_2}</div></div></div>`:''} ${r.prize_3?`<div style="display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px"><div style="font-size:20px">🥉</div><div><div style="font-size:11px;color:var(--text2)">3° POSTO</div><div style="font-size:14px;font-weight:600">${r.prize_3}</div></div></div>`:''}</div></div>`).join('');
+  }catch(e){}
+}
+
+async function loadTournaments(){
+  try{const{data,error}=await sb.from('tournaments').select('*').order('date',{ascending:true});allTournaments=(!error&&data)?data:[];}catch(e){allTournaments=[];}
+  renderTournaments(allTournaments);
+}
+
+function renderTournaments(list){
+  const c=document.getElementById('tournaments-list');
+  if(!list||!list.length){c.innerHTML='<div style="text-align:center;padding:40px;color:var(--text2);font-size:13px">Nessun torneo</div>';return;}
+  const labels={open:'Aperto',full:'Completo',ongoing:'In corso',closed:'Concluso'};
+  c.innerHTML=list.map(t=>{const spots=t.max_participants-(t.current_participants||0);const prizes=t.prizes?(typeof t.prizes==='string'?JSON.parse(t.prizes):t.prizes):[];return`<div class="tournament-card" onclick="openTournament(${t.id})"><div class="tc-header"><div class="tc-title">${t.name}</div><div class="tc-status ${t.status}">${labels[t.status]||t.status}</div></div><div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px"><span style="font-size:12px;color:var(--text2)">🎮 <strong style="color:var(--text)">${t.game||'—'}</strong></span><span style="font-size:12px;color:var(--text2)">📅 <strong style="color:var(--text)">${fmtDate(t.date)}</strong></span><span style="font-size:12px;color:var(--text2)">⏰ <strong style="color:var(--text)">${t.time||'—'}</strong></span></div><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:12px;color:var(--gold);font-weight:600">🏆 ${prizes[0]?.prize||'Premi in palio'}</div><div style="font-size:11px;color:var(--text2)">${spots>0?spots+' posti · ':''} €${t.fee||0}</div></div></div>`;}).join('');
+}
+
+function filterT(f,el){document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');renderTournaments(f==='all'?allTournaments:allTournaments.filter(t=>t.status===f));}
+
+async function openTournament(id){
+  const t=allTournaments.find(x=>x.id===id);if(!t)return;
+  const spots=t.max_participants-(t.current_participants||0);
+  const pct=((t.current_participants||0)/t.max_participants)*100;
+  const prizes=t.prizes?(typeof t.prizes==='string'?JSON.parse(t.prizes):t.prizes):[];
+  let isReg=false;
+  if(currentUser){try{const{data}=await sb.from('tournament_registrations').select('id').eq('tournament_id',t.id).eq('user_id',currentUser.id).single();isReg=!!data;}catch(e){}}
+  document.getElementById('modal-tourn-title').textContent=t.name;
+  document.getElementById('modal-tourn-body').innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px"><div style="background:var(--bg2);border-radius:8px;padding:12px;text-align:center"><div style="font-size:11px;color:var(--text2)">GIOCO</div><div style="font-weight:600;margin-top:4px">${t.game||'—'}</div></div><div style="background:var(--bg2);border-radius:8px;padding:12px;text-align:center"><div style="font-size:11px;color:var(--text2)">DATA</div><div style="font-weight:600;margin-top:4px">${fmtDate(t.date)}</div></div><div style="background:var(--bg2);border-radius:8px;padding:12px;text-align:center"><div style="font-size:11px;color:var(--text2)">QUOTA</div><div style="font-weight:600;margin-top:4px;color:var(--accent)">€${t.fee||0}</div></div><div style="background:var(--bg2);border-radius:8px;padding:12px;text-align:center"><div style="font-size:11px;color:var(--text2)">POSTI</div><div style="font-weight:600;margin-top:4px">${spots>0?spots+' liberi':'Completo'}</div></div></div><div style="background:var(--bg2);border-radius:8px;padding:12px;margin-bottom:16px"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text2)">Partecipanti</span><span style="font-size:12px">${t.current_participants||0}/${t.max_participants}</span></div><div style="background:var(--border);border-radius:4px;height:6px"><div style="background:var(--accent);height:6px;border-radius:4px;width:${pct}%"></div></div></div>${prizes.length?`<div style="margin-bottom:16px">${prizes.map(p=>`<div style="display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid rgba(42,42,58,.4)"><div style="font-family:'Rajdhani',sans-serif;font-size:14px;color:var(--gold);width:24px;flex-shrink:0">${p.pos}°</div><div style="font-size:13px">${p.prize}</div></div>`).join('')}</div>`:''}${isReg?`<div style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:8px;padding:12px;margin-bottom:12px;font-size:13px;color:var(--green);text-align:center">✅ Sei già iscritto!</div>`:''}<div style="display:flex;gap:10px">${!isReg&&t.status==='open'&&spots>0?`<button class="btn-primary" style="flex:1" onclick="registerTournament(${t.id})">ISCRIVITI — €${t.fee||0} in loco</button>`:`<button class="btn-primary" style="flex:1" disabled>${isReg?'GIÀ ISCRITTO':t.status==='full'?'COMPLETO':'N/D'}</button>`}${(t.status==='ongoing'||t.status==='closed')&&t.bracket_data?`<button class="btn-sm" onclick="showBracketView(${t.id})">TABELLONE</button>`:''}</div>`;
+  document.getElementById('modal-tournament').classList.add('open');
+}
+
+async function registerTournament(id){
+  if(!currentUser){showToast('Devi essere loggato','error');return;}
+  try{await sb.from('tournament_registrations').insert([{tournament_id:id,user_id:currentUser.id,username:currentProfile.username}]);
+    const t=allTournaments.find(x=>x.id===id);if(t)await sb.from('tournaments').update({current_participants:(t.current_participants||0)+1}).eq('id',id);
+    showToast('Iscrizione confermata!','success');closeModal('modal-tournament');loadTournaments();}catch(e){showToast('Già iscritto o errore','error');}
+}
+
+async function showBracketView(id){
+  const t=allTournaments.find(x=>x.id===id);if(!t||!t.bracket_data)return;
+  const bd=typeof t.bracket_data==='string'?JSON.parse(t.bracket_data):t.bracket_data;
+  const rounds=[{k:'q',l:'Quarti'},{k:'s',l:'Semi'},{k:'f',l:'Finale'}];
+  document.getElementById('bracket-view-title').textContent=`Tabellone — ${t.name}`;
+  document.getElementById('bracket-view-body').innerHTML=`<div style="overflow-x:auto"><div style="display:flex;gap:16px;min-width:max-content;align-items:flex-start;padding:8px 0">${rounds.filter(r=>bd[r.k]&&bd[r.k].length).map(r=>`<div style="flex-shrink:0"><div style="font-family:'Rajdhani',sans-serif;font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:2px;text-align:center;margin-bottom:10px">${r.l}</div>${bd[r.k].map(m=>`<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;width:150px;margin-bottom:18px"><div style="padding:8px 12px;font-size:12px;border-bottom:1px solid var(--border);${m.w===m.p1&&m.p1?'background:rgba(16,185,129,.15);color:var(--green);font-weight:700':m.w&&m.p1?'opacity:.4':''}">${m.p1||'TBD'}</div><div style="padding:8px 12px;font-size:12px;${m.w===m.p2&&m.p2?'background:rgba(16,185,129,.15);color:var(--green);font-weight:700':m.w&&m.p2?'opacity:.4':''}">${m.p2||'TBD'}</div></div>`).join('')}</div>`).join('')}</div></div>`;
+  closeModal('modal-tournament');document.getElementById('modal-bracket-view').classList.add('open');
+}
+
+async function loadGamesGrid(){
+  const grid=document.getElementById('games-grid');
+  try{const{data}=await sb.from('station_games').select('game_name,station_id').eq('active',true);
+    if(!data||!data.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text2);font-size:13px">Nessun gioco disponibile</div>';return;}
+    const games={};data.forEach(g=>{if(!games[g.game_name])games[g.game_name]=[];games[g.game_name].push(g.station_id);});
+    grid.innerHTML=Object.entries(games).map(([name,stations])=>`<div class="game-card" onclick="selectGameCard('${name.replace(/'/g,"\\'")}',${JSON.stringify(stations).replace(/"/g,'&quot;')})"><div class="game-card-icon">${gIcon(name)}</div><div class="game-card-name">${name}</div><div class="game-card-avail">${stations.length} postazion${stations.length>1?'i':'e'}</div></div>`).join('');
+  }catch(e){}
+}
+
+async function selectGameCard(gameName,stations){
+  if(stations.length===1){selectedGame=gameName;selectedStation=stations[0];showDateStep();return;}
+  const modal=document.createElement('div');modal.className='modal-overlay open';modal.id='msp';
+  modal.innerHTML=`<div class="modal"><div class="modal-handle"></div><div class="modal-close" onclick="document.getElementById('msp').remove()">✕</div><div class="modal-title">Postazione per<br><span style="color:var(--accent)">${gameName}</span></div>${stations.map(s=>`<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:12px" onclick="pickStation('${gameName.replace(/'/g,"\\'")}','${s}')"><div style="font-size:28px">${STATIONS[s]?.i||'🎮'}</div><div style="flex:1"><div style="font-size:15px;font-weight:600">${STATIONS[s]?.n||s}</div></div><div style="color:var(--text2)">›</div></div>`).join('')}</div>`;
+  document.body.appendChild(modal);
+}
+
+function pickStation(g,s){selectedGame=g;selectedStation=s;const el=document.getElementById('msp');if(el)el.remove();showDateStep();}
+
+function showDateStep(){
+  document.getElementById('step-game').style.display='none';
+  document.getElementById('step-date').style.display='block';
+  document.getElementById('sel-game-icon').textContent=gIcon(selectedGame);
+  document.getElementById('sel-game-name').textContent=selectedGame;
+  document.getElementById('sel-station-name').textContent=STATIONS[selectedStation]?.n||selectedStation;
+  document.getElementById('prenota-sub').textContent='Scegli data e orario';
+  loadSlots();
+}
+
+function resetBooking(){selectedGame=null;selectedStation=null;selectedSlotTime=null;selectedDuration=0;document.getElementById('step-game').style.display='block';document.getElementById('step-date').style.display='none';document.getElementById('confirm-bar').classList.remove('show');document.getElementById('prenota-sub').textContent='Scegli il gioco';}
+
+function changeDate(delta){const nd=new Date(currentDate);nd.setDate(nd.getDate()+delta);const today=new Date();today.setHours(0,0,0,0);if(nd<today)return;currentDate=nd;updateDateDisplay();selectedSlotTime=null;selectedDuration=0;document.getElementById('confirm-bar').classList.remove('show');if(selectedStation)loadSlots();}
+
+function updateDateDisplay(){const today=new Date();today.setHours(0,0,0,0);const d=new Date(currentDate);d.setHours(0,0,0,0);const diff=Math.round((d-today)/(1000*60*60*24));const days=['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];const months=['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];document.getElementById('day-name').textContent=diff===0?'OGGI':diff===1?'DOMANI':days[currentDate.getDay()].toUpperCase();document.getElementById('date-display').textContent=`${currentDate.getDate()} ${months[currentDate.getMonth()]} ${currentDate.getFullYear()}`;}
+
+async function loadSlots(){
+  if(!selectedStation)return;
+  const c=document.getElementById('slots-container');
+  const hours=getHours(currentDate);
+  const wk=isWk(currentDate);
+  const showPrice=isToday(currentDate);
+  const dateStr=currentDate.toISOString().split('T')[0];
+  let taken={};
+  try{const{data}=await sb.from('bookings').select('time_slot,username,duration_slots').eq('station',selectedStation).eq('date',dateStr).eq('status','confirmed');
+    if(data)data.forEach(b=>{const idx=hours.indexOf(b.time_slot);for(let i=0;i<(b.duration_slots||1);i++){if(idx+i<hours.length)taken[hours[idx+i]]=b.username||'Occupato';}});}catch(e){}
+  const p30=getPrice(selectedStation,30,wk);
+  c.innerHTML=hours.map(h=>{const isTaken=!!taken[h];const isSel=h===selectedSlotTime;return`<div class="time-slot ${isTaken?'taken':''} ${isSel?'selected':''}" onclick="${isTaken?'':'openDurationModal(\''+h+'\')'}"><div><div class="slot-time-text">${h}</div>${showPrice&&!isTaken?`<div style="font-size:10px;color:var(--text2);margin-top:2px">da €${p30}/30min</div>`:''}</div><div style="text-align:right"><div class="slot-status ${isTaken?'busy':'free'}" style="font-size:11px;font-weight:600">${isTaken?taken[h]:'Libero'}</div></div></div>`;}).join('');
+}
+
+function openDurationModal(slotTime){
+  const wk=isWk(currentDate);
+  const hours=getHours(currentDate);
+  const remaining=hours.length-hours.indexOf(slotTime);
+  const opts=[];
+  if(remaining>=1)opts.push({label:'30 minuti',mins:30,slots:1,price:getPrice(selectedStation,30,wk),note:''});
+  if(remaining>=2)opts.push({label:'1 ora',mins:60,slots:2,price:getPrice(selectedStation,60,wk),note:''});
+  if(remaining>=4)opts.push({label:'2 ore',mins:120,slots:4,price:getPrice(selectedStation,120,wk),note:'⚡ Miglior prezzo!'});
+  document.getElementById('dur-title').textContent=`${slotTime} — Durata`;
+  document.getElementById('dur-options').innerHTML=opts.map(o=>`<div class="duration-option" onclick="selectDuration('${slotTime}',${o.slots},${o.price},${o.mins})"><div><div class="duration-label">${o.label}</div>${o.note?`<div class="duration-note">${o.note}</div>`:''}</div><div class="duration-price">€${o.price}</div></div>`).join('');
+  document.getElementById('modal-duration').classList.add('open');
+}
+
+function selectDuration(slotTime,slots,price,mins){
+  closeModal('modal-duration');
+  selectedSlotTime=slotTime;selectedDuration=slots;selectedPrice=price;
+  document.querySelectorAll('.time-slot').forEach(el=>el.classList.remove('selected'));
+  const hours=getHours(currentDate);const si=hours.indexOf(slotTime);
+  document.querySelectorAll('.time-slot').forEach((el,i)=>{if(i>=si&&i<si+slots)el.classList.add('selected');});
+  const months=['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
+  document.getElementById('confirm-summary').innerHTML=`<strong>${gIcon(selectedGame)} ${selectedGame}</strong> · ${STATIONS[selectedStation]?.n} · ${currentDate.getDate()} ${months[currentDate.getMonth()]} · <strong>${slotTime}→${addM(slotTime,mins)}</strong> — <strong style="color:var(--green)">€${price}</strong>`;
+  document.getElementById('confirm-bar').classList.add('show');
+}
+
+async function confirmBooking(){
+  if(!selectedSlotTime||!selectedStation||!currentUser){showToast('Seleziona orario e durata','error');return;}
+  const dateStr=currentDate.toISOString().split('T')[0];
+  const oreGuadagnate=selectedDuration*30/60;
+  try{
+    const{error}=await sb.from('bookings').insert([{user_id:currentUser.id,username:currentProfile.username,station:selectedStation,date:dateStr,time_slot:selectedSlotTime,duration_slots:selectedDuration,total_price:selectedPrice,status:'confirmed',game_name:selectedGame}]);
+    if(error)throw error;
+    const newOre=(currentProfile.ore_gioco||0)+oreGuadagnate;
+    await sb.from('profiles').update({ore_gioco:newOre}).eq('id',currentUser.id);
+    currentProfile.ore_gioco=newOre;updateUI();
+  }catch(e){}
+  showToast('Prenotazione confermata!','success');
+  if('Notification' in window&&Notification.permission==='granted'){const months=['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];new Notification('GL Asti',{body:`${selectedGame} · ${STATIONS[selectedStation]?.n} · ${currentDate.getDate()} ${months[currentDate.getMonth()]} alle ${selectedSlotTime}`});}
+  document.getElementById('confirm-bar').classList.remove('show');selectedSlotTime=null;selectedDuration=0;selectedPrice=0;loadSlots();loadMyBookings();
+}
+
+async function loadMyBookings(){
+  if(!currentUser)return;
+  const c=document.getElementById('my-bookings');
+  try{const today=new Date().toISOString().split('T')[0];const{data}=await sb.from('bookings').select('*').eq('user_id',currentUser.id).gte('date',today).eq('status','confirmed').order('date',{ascending:true}).order('time_slot',{ascending:true});
+    if(!data||!data.length){c.innerHTML='<div style="text-align:center;padding:20px;color:var(--text2);font-size:13px">Nessuna prenotazione</div>';return;}
+    c.innerHTML=data.map(b=>{const st=STATIONS[b.station]||{n:b.station,i:'🎮'};return`<div class="booking-item"><div class="booking-item-header"><div class="booking-item-title">${b.game_name||st.i+' '+st.n}</div><div class="booking-item-status">Confermata</div></div><div class="booking-item-meta">📅 ${fmtDate(b.date)} · ⏰ ${b.time_slot}→${addM(b.time_slot,(b.duration_slots||1)*30)} · ${st.n} · €${b.total_price||0}</div><button class="btn-cancel-sm" onclick="cancelBooking(${b.id})">CANCELLA</button></div>`;}).join('');}catch(e){}
+}
+
+async function cancelBooking(id){try{await sb.from('bookings').update({status:'cancelled'}).eq('id',id);}catch(e){}showToast('Cancellata','success');loadMyBookings();if(selectedStation)loadSlots();}
+
+async function loadVouchers(countOnly=false){
+  if(!currentUser)return;
+  try{const{data}=await sb.from('vouchers').select('*').eq('user_id',currentUser.id);
+    if(countOnly){document.getElementById('ps-buoni').textContent=data?data.filter(v=>v.status==='active').length:0;return;}
+    const c=document.getElementById('vouchers-list');
+    if(!data||!data.length){c.innerHTML='<div style="text-align:center;padding:40px;color:var(--text2);font-size:13px">Nessun buono ancora</div>';return;}
+    c.innerHTML=data.map(v=>`<div class="voucher-card ${v.status==='active'?'active-v':'used-v'}"><div class="voucher-amount">€${v.amount}</div><div class="voucher-label">${v.reason||'Buono Gaming Lounge'}</div><div class="voucher-code">${v.code}</div><div class="voucher-footer"><div class="voucher-exp">Scade: ${v.expires_at?new Date(v.expires_at).toLocaleDateString('it'):'—'}</div><div class="voucher-badge ${v.status==='active'?'active-b':'used-b'}">${v.status==='active'?'ATTIVO':'USATO'}</div></div></div>`).join('');}catch(e){}
+}
+
+async function requestNotifications(){
+  if(!('Notification' in window)){showToast('Non supportate','error');return;}
+  const p=await Notification.requestPermission();
+  if(p==='granted'){document.getElementById('notif-dot').style.display='block';document.getElementById('notif-menu-text').textContent='Notifiche attive ✓';showToast('Notifiche attivate!','success');}
+  else showToast('Permesso negato','error');
+}
+
+// ADMIN
+function showAdminPage(p,el){
+  document.querySelectorAll('.admin-page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.admin-tab').forEach(x=>x.classList.remove('active'));
+  document.getElementById('admin-'+p).classList.add('active');el.classList.add('active');
+  if(p==='overview')loadAdminOverview();
+  if(p==='bookings'){const today=new Date().toISOString().split('T')[0];document.getElementById('adm-f-date').value=today;loadAdminBookings();}
+  if(p==='games')loadAdminGames();
+  if(p==='ore')loadAdminOre();
+  if(p==='promo')loadAdminPromo();
+  if(p==='tournaments')loadAdminTournaments();
+  if(p==='bracket')loadBracketSelect();
+  if(p==='rankings')loadAdminRankings();
+  if(p==='vouchers')loadAdminVouchers();
+  if(p==='users')loadAdminUsers();
+}
+
+async function loadAdminData(){loadAdminOverview();loadAdminTournaments();loadBracketSelect();loadAdminRankings();loadAdminVouchers();loadAdminUsers();loadAdminPromo();}
+
+async function loadAdminOverview(){
+  const today=new Date().toISOString().split('T')[0];
+  try{const{data:bk}=await sb.from('bookings').select('*').eq('date',today).eq('status','confirmed');
+    const ricavi=bk?bk.reduce((s,b)=>s+(b.total_price||0),0):0;
+    document.getElementById('adm-ricavi').textContent='€'+ricavi;
+    document.getElementById('adm-pren').textContent=bk?bk.length:0;
+    const{count:u}=await sb.from('profiles').select('*',{count:'exact',head:true});document.getElementById('adm-utenti').textContent=u||0;
+    const{count:ba}=await sb.from('vouchers').select('*',{count:'exact',head:true}).eq('status','active');document.getElementById('adm-buoni-att').textContent=ba||0;
+    const list=document.getElementById('adm-today-list');
+    if(!bk||!bk.length){list.innerHTML='<div style="text-align:center;padding:12px;color:var(--text2);font-size:13px">Nessuna prenotazione oggi</div>';return;}
+    list.innerHTML=bk.sort((a,b)=>a.time_slot.localeCompare(b.time_slot)).map(b=>`<div class="admin-row"><div><div style="font-size:13px;font-weight:600">${b.game_name||STATIONS[b.station]?.n||b.station}</div><div style="font-size:11px;color:var(--text2)">⏰ ${b.time_slot} · ${(b.duration_slots||1)*30}min · 👤 ${b.username||'—'}</div></div><div style="display:flex;align-items:center;gap:8px"><strong style="color:var(--green)">€${b.total_price||0}</strong><button class="btn-danger" onclick="adminCancelBooking(${b.id})">✕</button></div></div>`).join('');
+  }catch(e){}
+}
+
+async function adminCancelBooking(id){await sb.from('bookings').update({status:'cancelled'}).eq('id',id);showToast('Cancellata','success');loadAdminOverview();}
+
+async function findClientVouchers(){
+  const code=document.getElementById('client-code-search').value.trim();
+  const res=document.getElementById('client-voucher-result');
+  if(!code||code.length!==4){res.innerHTML='<div style="color:var(--accent);font-size:13px">Inserisci codice a 4 cifre</div>';return;}
+  try{const{data:profile}=await sb.from('profiles').select('id,username,email').eq('client_code',code).single();
+    if(!profile){res.innerHTML='<div style="color:var(--accent);font-size:13px">❌ Codice non trovato</div>';return;}
+    const{data:vouchers}=await sb.from('vouchers').select('*').eq('user_id',profile.id).eq('status','active');
+    if(!vouchers||!vouchers.length){res.innerHTML=`<div style="font-size:13px;margin-bottom:6px"><strong>${profile.username}</strong></div><div style="color:var(--text2);font-size:13px">Nessun buono attivo</div>`;return;}
+    res.innerHTML=`<div style="font-size:13px;margin-bottom:10px"><strong>${profile.username}</strong> · <span style="color:var(--gold);font-family:'Rajdhani',sans-serif;letter-spacing:3px">${code}</span></div>${vouchers.map(v=>`<div style="background:var(--bg3);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center"><div><div style="font-family:'Rajdhani',sans-serif;font-size:22px;color:var(--gold)">€${v.amount}</div><div style="font-size:11px;color:var(--text2)">${v.reason||'—'}</div></div><button class="btn-success" onclick="useVoucher(${v.id},'${v.code}')">USA</button></div>`).join('')}`;
+  }catch(e){}
+}
+
+async function useVoucher(id,code){
+  if(!confirm(`Usare il buono ${code}?`))return;
+  await sb.from('vouchers').update({status:'used',used_at:new Date().toISOString()}).eq('id',id);
+  showToast('Buono usato!','success');document.getElementById('client-code-search').value='';document.getElementById('client-voucher-result').innerHTML='';loadAdminVouchers();
+}
+
+async function loadAdminBookings(){
+  const date=document.getElementById('adm-f-date').value,list=document.getElementById('adm-bookings-list');
+  if(!date){list.innerHTML='<div style="text-align:center;padding:12px;color:var(--text2);font-size:13px">Seleziona una data</div>';return;}
+  try{const{data}=await sb.from('bookings').select('*').eq('date',date).order('time_slot',{ascending:true});
+    document.getElementById('adm-book-count').textContent=`(${data?.length||0})`;
+    if(!data||!data.length){list.innerHTML='<div style="text-align:center;padding:12px;color:var(--text2);font-size:13px">Nessuna prenotazione</div>';return;}
+    list.innerHTML=data.map(b=>`<div class="admin-row"><div><div style="font-size:13px;font-weight:600">${b.game_name||STATIONS[b.station]?.n||b.station}</div><div style="font-size:11px;color:var(--text2)">⏰ ${b.time_slot} · ${(b.duration_slots||1)*30}min · 👤 ${b.username||'—'} · ${b.status}</div></div><div style="display:flex;align-items:center;gap:8px"><strong>€${b.total_price||0}</strong><button class="btn-danger" onclick="adminCancelBooking(${b.id})">✕</button></div></div>`).join('');}catch(e){}
+}
+
+async function loadAdminGames(){
+  const list=document.getElementById('adm-games-list');
+  try{const{data}=await sb.from('station_games').select('*').order('station_id').order('game_name');
+    if(!data||!data.length){list.innerHTML='<div style="text-align:center;padding:12px;color:var(--text2);font-size:13px">Nessun gioco</div>';return;}
+    const byStation={};data.forEach(g=>{if(!byStation[g.station_id])byStation[g.station_id]=[];byStation[g.station_id].push(g);});
+    list.innerHTML=Object.entries(byStation).map(([st,games])=>`<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px">${STATIONS[st]?.n||st}</div>${games.map(g=>`<div class="admin-row"><div style="font-size:13px">${gIcon(g.game_name)} ${g.game_name}</div><button class="btn-danger" onclick="removeStationGame(${g.id})">✕</button></div>`).join('')}</div>`).join('');
+  }catch(e){}
+}
+
+async function addStationGame(){
+  const station=document.getElementById('ag-station').value,name=document.getElementById('ag-name').value.trim();
+  if(!name){showToast('Inserisci nome gioco','error');return;}
+  try{await sb.from('station_games').insert([{station_id:station,game_name:name,active:true}]);showToast('Gioco aggiunto!','success');document.getElementById('ag-name').value='';loadAdminGames();loadGamesGrid();}catch(e){showToast('Errore','error');}
+}
+
+async function removeStationGame(id){await sb.from('station_games').delete().eq('id',id);showToast('Rimosso','success');loadAdminGames();loadGamesGrid();}
+
+async function loadAdminOre(){
+  const list=document.getElementById('adm-ore-list');
+  try{const{data}=await sb.from('profiles').select('username,email,ore_gioco').order('ore_gioco',{ascending:false}).limit(30);
+    if(!data||!data.length){list.innerHTML='<div style="text-align:center;padding:12px;color:var(--text2);font-size:13px">Nessun dato</div>';return;}
+    list.innerHTML=data.map((u,i)=>`<div class="admin-row"><div><div style="font-size:13px;font-weight:600">#${i+1} ${u.username||'—'}</div><div style="font-size:11px;color:var(--text2)">${u.email}</div></div><div style="font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;color:var(--gold)">${fmtOre(u.ore_gioco||0)}</div></div>`).join('');
+  }catch(e){}
+}
+
+async function addOreManually(){
+  const email=document.getElementById('ore-email').value.trim(),ore=parseFloat(document.getElementById('ore-amount').value)||0;
+  if(!email||ore<=0){showToast('Inserisci email e ore','error');return;}
+  try{const{data:profile}=await sb.from('profiles').select('id,username,ore_gioco').eq('email',email).single();
+    if(!profile){showToast('Utente non trovato','error');return;}
+    await sb.from('profiles').update({ore_gioco:(profile.ore_gioco||0)+ore}).eq('id',profile.id);
+    showToast(`+${ore}h a ${profile.username}!`,'success');document.getElementById('ore-email').value='';loadAdminOre();
+  }catch(e){showToast('Errore','error');}
+}
+
+function addPrizeRow(cid){const c=document.getElementById(cid);const rows=c.querySelectorAll('.prize-row');const pos=rows.length+1;const row=document.createElement('div');row.className='prize-row';row.innerHTML=`<div class="prize-pos">${pos}°</div><input class="prize-input" placeholder="Premio ${pos}° posto" data-pos="${pos}">`;c.appendChild(row);}
+function removePrizeRow(cid){const c=document.getElementById(cid);const rows=c.querySelectorAll('.prize-row');if(rows.length>1)c.removeChild(rows[rows.length-1]);}
+
+async function createTournament(){
+  const name=document.getElementById('at-name').value,game=document.getElementById('at-game').value,date=document.getElementById('at-date').value,time=document.getElementById('at-time').value,max=parseInt(document.getElementById('at-max').value),fee=parseInt(document.getElementById('at-fee').value);
+  if(!name||!date){showToast('Compila nome e data','error');return;}
+  const prizes=Array.from(document.querySelectorAll('#at-prizes-container .prize-input')).filter(i=>i.value.trim()).map(i=>({pos:parseInt(i.dataset.pos),prize:i.value.trim()}));
+  try{const{error}=await sb.from('tournaments').insert([{name,game,date,time,max_participants:max,fee,status:'open',current_participants:0,prizes:JSON.stringify(prizes)}]);
+    if(error)throw error;showToast('Torneo creato!','success');document.getElementById('at-name').value='';loadAdminTournaments();loadTournaments();}catch(e){showToast('Errore','error');}
+}
+
+async function loadAdminTournaments(){
+  const list=document.getElementById('adm-tournaments-list');
+  try{const{data}=await sb.from('tournaments').select('*').order('date',{ascending:false});
+    if(!data||!data.length){list.innerHTML='<div style="text-align:center;padding:12px;color:var(--text2);font-size:13px">Nessun torneo</div>';return;}
+    const labels={open:'Aperto',full:'Completo',ongoing:'In corso',closed:'Concluso'};
+    list.innerHTML=data.map(t=>`<div class="admin-row"><div><div style="font-size:13px;font-weight:600">${t.name}</div><div style="font-size:11px;color:var(--text2)">${t.game} · ${fmtDate(t.date)} · ${t.current_participants||0}/${t.max_participants} · ${labels[t.status]||t.status}</div></div><div style="display:flex;gap:5px;flex-wrap:wrap">${t.status==='open'?`<button class="btn-sm" style="font-size:10px;padding:4px 8px" onclick="updateTournStatus(${t.id},'ongoing')">Avvia</button>`:''}${t.status==='ongoing'?`<button class="btn-sm" style="font-size:10px;padding:4px 8px" onclick="updateTournStatus(${t.id},'closed')">Chiudi</button>`:''}<button class="btn-danger" onclick="deleteTournament(${t.id})">✕</button></div></div>`).join('');
+  }catch(e){}
+}
+
+async function updateTournStatus(id,status){await sb.from('tournaments').update({status}).eq('id',id);showToast('Aggiornato','success');loadAdminTournaments();loadTournaments();}
+async function deleteTournament(id){if(!confirm('Eliminare?'))return;await sb.from('tournaments').delete().eq('id',id);showToast('Eliminato','success');loadAdminTournaments();loadTournaments();}
+
+async function loadBracketSelect(){
+  const sel=document.getElementById('bracket-select');
+  try{const{data}=await sb.from('tournaments').select('id,name').order('date',{ascending:false});sel.innerHTML='<option value="">-- Seleziona --</option>'+(data||[]).map(t=>`<option value="${t.id}">${t.name}</option>`).join('');}catch(e){}
+}
+
+async function loadBracketEditor(){
+  const id=document.getElementById('bracket-select').value,container=document.getElementById('bracket-editor-container');
+  if(!id){container.innerHTML='<div style="text-align:center;padding:12px;color:var(--text2);font-size:13px">Seleziona un torneo</div>';return;}
+  currentBracketId=id;let players=[];
+  try{const{data}=await sb.from('tournament_registrations').select('username').eq('tournament_id',id);players=(data||[]).map(r=>r.username);}catch(e){}
+  while(players.length<8)players.push('');
+  try{const{data}=await sb.from('tournaments').select('bracket_data').eq('id',id).single();if(data?.bracket_data)bracketData=typeof data.bracket_data==='string'?JSON.parse(data.bracket_data):data.bracket_data;else bracketData={};}catch(e){bracketData={};}
+  if(!bracketData.q)bracketData.q=Array(4).fill(null).map((_,i)=>({p1:players[i*2]||'',p2:players[i*2+1]||'',w:''}));
+  if(!bracketData.s)bracketData.s=Array(2).fill(null).map(()=>({p1:'',p2:'',w:''}));
+  if(!bracketData.f)bracketData.f=[{p1:'',p2:'',w:''}];
+  renderBracketEditor();
+}
+
+function renderBracketEditor(){
+  const container=document.getElementById('bracket-editor-container');
+  const rounds=[{k:'q',l:'Quarti',count:4},{k:'s',l:'Semi',count:2},{k:'f',l:'Finale',count:1}];
+  container.innerHTML=`<div style="overflow-x:auto;padding-bottom:8px"><div style="display:flex;gap:14px;min-width:max-content;align-items:flex-start">${rounds.map(r=>`<div style="flex-shrink:0"><div style="font-family:'Rajdhani',sans-serif;font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:2px;text-align:center;margin-bottom:10px">${r.l}</div>${bracketData[r.k].map((m,mi)=>`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;overflow:hidden;width:155px;margin-bottom:${r.k==='q'?14:r.k==='s'?38:76}px"><div class="bracket-slot-edit ${m.w&&m.w===m.p1?'winner-e':''}"><button class="win-btn ${m.w===m.p1&&m.p1?'active':''}" onclick="setBracketWinner('${r.k}',${mi},'p1')">✓</button><input class="bracket-name-input" placeholder="Giocatore..." value="${m.p1||''}" onchange="updateBracket('${r.k}',${mi},'p1',this.value)"></div><div class="bracket-slot-edit ${m.w&&m.w===m.p2?'winner-e':''}"><button class="win-btn ${m.w===m.p2&&m.p2?'active':''}" onclick="setBracketWinner('${r.k}',${mi},'p2')">✓</button><input class="bracket-name-input" placeholder="Giocatore..." value="${m.p2||''}" onchange="updateBracket('${r.k}',${mi},'p2',this.value)"></div></div>`).join('')}</div>`).join('')}</div></div>`;
+}
+
+function updateBracket(r,i,s,v){if(bracketData[r])bracketData[r][i][s]=v;}
+function setBracketWinner(round,idx,slot){
+  if(!bracketData[round])return;const m=bracketData[round][idx];m.w=m[slot];
+  if(round==='q'){if(!bracketData.s)bracketData.s=Array(2).fill(null).map(()=>({p1:'',p2:'',w:''}));bracketData.s[Math.floor(idx/2)][idx%2===0?'p1':'p2']=m.w;}
+  if(round==='s'){if(!bracketData.f)bracketData.f=[{p1:'',p2:'',w:''}];bracketData.f[0][idx===0?'p1':'p2']=m.w;}
+  renderBracketEditor();
+}
+async function saveBracket(){
+  if(!currentBracketId){showToast('Seleziona un torneo','error');return;}
+  try{await sb.from('tournaments').update({bracket_data:JSON.stringify(bracketData)}).eq('id',currentBracketId);showToast('Bracket salvato!','success');loadTournaments();}catch(e){showToast('Errore','error');}
+}
+
+async function createRanking(){
+  const name=document.getElementById('rk-name').value,start=document.getElementById('rk-start').value,end=document.getElementById('rk-end').value,p1=document.getElementById('rk-prize1').value,p2=document.getElementById('rk-prize2').value,p3=document.getElementById('rk-prize3').value;
+  if(!name||!start||!end){showToast('Compila tutti i campi','error');return;}
+  try{const{error}=await sb.from('rankings').insert([{name,period_start:start,period_end:end,prize_1:p1,prize_2:p2,prize_3:p3,status:'active'}]);
+    if(error)throw error;showToast('Classifica creata!','success');document.getElementById('rk-name').value='';loadAdminRankings();loadRankingsList();}catch(e){showToast('Errore','error');}
+}
+
+async function loadAdminRankings(){
+  const list=document.getElementById('adm-rankings-list');
+  try{const{data}=await sb.from('rankings').select('*').order('period_start',{ascending:false});
+    if(!data||!data.length){list.innerHTML='<div style="text-align:center;padding:12px;color:var(--text2);font-size:13px">Nessuna classifica</div>';return;}
+    list.innerHTML=data.map(r=>`<div class="admin-row"><div><div style="font-size:13px;font-weight:600">${r.name}</div><div style="font-size:11px;color:var(--text2)">${fmtDate(r.period_start)} → ${fmtDate(r.period_end)}</div></div><button class="btn-danger" onclick="deleteRanking(${r.id})">✕</button></div>`).join('');
+  }catch(e){}
+}
+
+async function deleteRanking(id){if(!confirm('Eliminare?'))return;await sb.from('rankings').delete().eq('id',id);showToast('Eliminata','success');loadAdminRankings();}
+
+async function loadAdminVouchers(){
+  const list=document.getElementById('adm-vouchers-list');
+  try{const{data}=await sb.from('vouchers').select('*,profiles(username,client_code)').order('id',{ascending:false}).limit(30);
+    if(!data||!data.length){list.innerHTML='<div style="text-align:center;padding:12px;color:var(--text2);font-size:13px">Nessun buono</div>';return;}
+    list.innerHTML=data.map(v=>`<div class="admin-row"><div><div style="font-size:13px;font-weight:600;font-family:'Rajdhani',sans-serif;letter-spacing:2px;color:var(--gold)">${v.code}</div><div style="font-size:11px;color:var(--text2)">${v.profiles?.username||'—'} (${v.profiles?.client_code||'—'}) · ${v.reason||'—'}</div></div><div style="display:flex;align-items:center;gap:8px"><strong style="color:${v.status==='active'?'var(--green)':'var(--text2)'}">€${v.amount}</strong>${v.status==='active'?`<button class="btn-success" onclick="useVoucher(${v.id},'${v.code}')">USA</button>`:''}</div></div>`).join('');
+  }catch(e){}
+}
+
+async function createVoucher(){
+  const email=document.getElementById('av-email').value,amount=parseInt(document.getElementById('av-amount').value),reason=document.getElementById('av-reason').value;
+  if(!email||!amount){showToast('Inserisci email e importo','error');return;}
+  const code='GL-'+Math.random().toString(36).substring(2,8).toUpperCase();
+  try{const{data:ud}=await sb.from('profiles').select('id').eq('email',email).single();
+    if(!ud){showToast('Utente non trovato','error');return;}
+    const exp=new Date();exp.setMonth(exp.getMonth()+3);
+    await sb.from('vouchers').insert([{user_id:ud.id,amount,reason,code,status:'active',expires_at:exp.toISOString()}]);
+    showToast(`Buono €${amount} emesso!`,'success');document.getElementById('av-email').value='';loadAdminVouchers();}catch(e){showToast('Errore','error');}
+}
+
+async function loadAdminUsers(){
+  const list=document.getElementById('adm-users-list');
+  try{const{data}=await sb.from('profiles').select('*').order('ore_gioco',{ascending:false});
+    if(!data||!data.length){list.innerHTML='<div style="text-align:center;padding:12px;color:var(--text2);font-size:13px">Nessun utente</div>';return;}
+    list.innerHTML=data.map(u=>`<div class="admin-row"><div><div style="font-size:13px;font-weight:600">${u.username||'—'} ${u.is_admin?'<span class="admin-badge">ADMIN</span>':''}</div><div style="font-size:11px;color:var(--text2)">${u.email} · <span style="color:var(--gold);font-family:'Rajdhani',sans-serif;letter-spacing:2px">${u.client_code||'——'}</span> · ${fmtOre(u.ore_gioco||0)}</div></div><div style="display:flex;gap:5px">${!u.is_admin?`<button class="btn-sm" style="font-size:10px;padding:4px 8px" onclick="toggleAdmin('${u.id}',true)">→Admin</button>`:`<button class="btn-danger" onclick="toggleAdmin('${u.id}',false)">Rimuovi</button>`}<button class="btn-sm" style="font-size:10px;padding:4px 8px" onclick="regenCode('${u.id}')">↻</button></div></div>`).join('');
+  }catch(e){}
+}
+
+async function toggleAdmin(id,val){await sb.from('profiles').update({is_admin:val}).eq('id',id);showToast(val?'Admin aggiunto':'Rimosso','success');loadAdminUsers();}
+async function regenCode(id){const code=String(Math.floor(Math.random()*9000)+1000);await sb.from('profiles').update({client_code:code}).eq('id',id);showToast('Codice: '+code,'success');loadAdminUsers();}
+
+function switchTab(tab){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  const nav=document.getElementById('nav-'+tab);if(nav)nav.classList.add('active');
+  if(tab==='buoni')loadVouchers(false);
+  if(tab==='classifica')loadFullLeaderboard();
+  if(tab==='prenota'){resetBooking();loadMyBookings();}
+  if(tab==='admin')loadAdminData();
+}
+
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className=`toast ${type} show`;setTimeout(()=>t.className='toast',3000);}
+</script>
+</body>
+</html>
