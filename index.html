@@ -5,43 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GL Asti - Gaming Lounge</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Carica Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
     <nav class="navbar">
-        <div class="nav-item" onclick="showSection('home')">Home</div>
-        <div class="nav-item" onclick="showSection('booking')">Prenota</div>
-        <div class="nav-item" onclick="showSection('leaderboard')">Classifica</div>
-        <div id="admin-link" class="nav-item" style="display:none;" onclick="showSection('admin')">Admin</div>
-        <div class="nav-item" onclick="showSection('profile')">Profilo</div>
+        <div class="nav-brand">GL ASTI</div>
+        <div class="nav-links">
+            <div class="nav-item" onclick="showSection('booking')"><i class="fas fa-calendar-alt"></i> Prenota</div>
+            <div class="nav-item" onclick="showSection('leaderboard')"><i class="fas fa-trophy"></i> Classifica</div>
+            <div id="admin-link" class="nav-item admin-only" onclick="showSection('admin')"><i class="fas fa-user-shield"></i> Admin</div>
+            <div class="nav-item" onclick="showSection('profile')"><i class="fas fa-user"></i> Profilo</div>
+        </div>
     </nav>
 
-    <main id="main-content">
-        <!-- Sezione Home/Login -->
-        <section id="sec-home" class="page-section">
-            <div id="login-welcome">
-                <h1>Benvenuto alla GL Asti</h1>
-                <p>Verifica della sessione in corso...</p>
+    <main>
+        <!-- SEZIONE PRENOTAZIONE -->
+        <section id="sec-booking" class="page-section">
+            <div class="calendar-header">
+                <button onclick="changeDay(-1)"><i class="fas fa-chevron-left"></i></button>
+                <h2 id="current-date-display">Oggi</h2>
+                <button onclick="changeDay(1)"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div id="time-grid" class="time-grid">
+                <!-- Gli slot da 30 min verranno generati qui -->
             </div>
         </section>
 
-        <!-- Sezione Prenotazione -->
-        <section id="sec-booking" class="page-section" style="display:none;">
-            <h2>Prenota la tua sessione</h2>
-            <div class="card">
-                <button class="btn-popup" onclick="openGamePopup()">🎮 Scegli Gioco</button>
-                <p id="selected-game-display">Nessun gioco selezionato</p>
-                <div id="price-preview">Prezzo: -- €</div>
+        <!-- SEZIONE ADMIN -->
+        <section id="sec-admin" class="page-section" style="display:none;">
+            <div class="admin-container">
+                <h2>Pannello di Controllo</h2>
+                <div class="admin-card">
+                    <h3><i class="fas fa-tag"></i> Imposta Prezzi (€)</h3>
+                    <div id="admin-prices-grid">
+                        <!-- Input per i prezzi caricati dal DB -->
+                    </div>
+                    <button class="btn-save" onclick="updatePricesOnDB()">Salva Prezzi</button>
+                </div>
+                <div class="admin-card">
+                    <h3><i class="fas fa-gamepad"></i> Catalogo Giochi</h3>
+                    <textarea id="admin-games-list" rows="6" placeholder="Un gioco per riga..."></textarea>
+                    <button class="btn-save" onclick="saveGamesList()">Salva Catalogo</button>
+                </div>
             </div>
         </section>
-
-        <!-- Altre sezioni (vuote per ora) -->
-        <section id="sec-leaderboard" class="page-section" style="display:none;"><h2>Classifica</h2></section>
-        <section id="sec-admin" class="page-section" style="display:none;"><h2>Pannello Admin</h2></section>
-        <section id="sec-profile" class="page-section" style="display:none;"><h2>Il tuo Profilo</h2></section>
     </main>
+
+    <!-- POPUP PRENOTAZIONE UNICO -->
+    <div id="booking-modal" class="modal">
+        <div class="modal-content cyberpunk-border">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h3 id="modal-time-title">Prenota per le --:--</h3>
+            
+            <div class="category-selector">
+                <div class="cat-btn" id="cat-ps" onclick="selectCategory('ps')">
+                    <i class="fas fa-gamepad"></i>
+                    <span>PS5</span>
+                </div>
+                <div class="cat-btn" id="cat-sim" onclick="selectCategory('sim')">
+                    <i class="fas fa-steering-wheel"></i>
+                    <span>SIM</span>
+                </div>
+                <div class="cat-btn" id="cat-vr" onclick="selectCategory('vr')">
+                    <i class="fas fa-vr-cardboard"></i>
+                    <span>VR</span>
+                </div>
+            </div>
+
+            <div id="booking-details" style="display:none;">
+                <h4>Scegli Durata:</h4>
+                <div class="duration-options">
+                    <button onclick="selectDuration(30)">30m - <span id="p-30">--</span>€</button>
+                    <button onclick="selectDuration(60)">1h - <span id="p-60">--</span>€</button>
+                    <button onclick="selectDuration(120)">2h - <span id="p-120">--</span>€</button>
+                </div>
+                <h4>Scegli Gioco:</h4>
+                <select id="game-select"></select>
+                <button class="btn-confirm-final" onclick="finalizzaPrenotazione()">CONFERMA PRENOTAZIONE</button>
+            </div>
+        </div>
+    </div>
 
     <script src="app.js"></script>
 </body>
